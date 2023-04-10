@@ -1,3 +1,4 @@
-# GlobalWarming
-Global Temperature Prediction
-./TempPrediction.png
+# Global Warming
+A simple, but surprisingly accurate model for predicting global temperatures
+
+![Plot](./TempPrediction.png)
