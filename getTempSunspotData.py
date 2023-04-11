@@ -7,12 +7,11 @@ import os
     
 def getTempSunspotData(useLocal = True, plotData=False, temp_filename = 'globalTempAnomalies.csv', ss_filename = 'sunspots.csv'):
     ########### SUNSPOTS ########################
-    # Source: WDC-SILSO, Royal Observatory of Belgium, Brussels
-    #https://www.sidc.be/silso/datafiles
+    #Source: WDC-SILSO, Royal Observatory of Belgium, Brussels
+    #website: https://www.sidc.be/silso/datafiles
     if useLocal and os.path.isfile(ss_filename):
         df_ss=pd.read_csv(ss_filename)
     else:
-        #website: https://www.sidc.be/silso/datafiles
         url = 'https://www.sidc.be/silso/INFO/snmtotcsv.php'
         logging.debug('Gathering sunspot data from '+url+' ...')
         df_ss=pd.read_csv(url, encoding="ISO-8859-1",header=None, delimiter='\;')
@@ -23,10 +22,11 @@ def getTempSunspotData(useLocal = True, plotData=False, temp_filename = 'globalT
     
     
     ########### GLOBAL TEMPERATURE ########################
+    #Source: NOAA
+    #website: https://www.ncei.noaa.gov/access/monitoring/global-temperature-anomalies/anomalies
     if useLocal and os.path.isfile(temp_filename):
         df_temp = pd.read_csv(temp_filename)
     else:
-        #website: https://www.ncei.noaa.gov/access/monitoring/global-temperature-anomalies/anomalies
         url = 'https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/land_ocean/all/12/1850-2023.csv'
         logging.debug('Gathering Temperature data from '+url+' ...')
         df_temp=pd.read_csv(url, encoding="ISO-8859-1",header=4)
