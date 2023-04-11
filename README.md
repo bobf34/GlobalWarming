@@ -10,5 +10,5 @@ Download both py files then run tempPredict.py
 There are several different preconfigured models in a comment block.  Copy the desired model 'parms' dictionary and replace (or place below) the parms dictionary located just below the comment block.  You can also create your own model by adjusting the parameters of an existing model.
 
 ### Required Datasets
-The first time you run the program it will automatically download the two datasets required to run the program.
+The first time you run the program it will automatically download the two required datasets.
 
