@@ -69,23 +69,30 @@ def getModel(modelType,rectW, rectW2):
     return(model)
 
 def computeTemps(df_temp,x_model,co2comp,advance,MA=1):
-    # compensate the temperature data from the dataset
+    # co2 compensate the temperature data from the dataset, i.e. remove co2 warming
     co2Model = getCO2model(co2comp)
     co2 = co2Model(df_temp.Year)  #the model
     x_temp = df_temp.Temperature - co2
 
-    #fit the predicted temps for scale and offset agains the co2 compensated actual temps
+    # ignore data prior to 1900 for fitting and error computations.  
     ig = int((firstValidYear - df_temp.Year[0])*12)
-    #ig = 20*12
+
+    #find scale and offset that minimizes  err = (actual_temps-co2) - (scale*predictions + offset)
     if advance>0:
                [scale,offset] =  np.polyfit(x_model[ig:-12*advance],x_temp[ig:],1)
     else:
                [scale,offset] =  np.polyfit(x_model[ig:],x_temp[ig:],1)
+    # apply the scale and offset correction and then add the co2 contribution into the model 
     x_model_comp =  scale*x_model + offset
     x_model_comp += co2Model(t_model)
 
-    #rmserr = rms(df_temp.Temperature[ig:] - x_model[ig:len(df_temp)])
+    #now compute the remaining error as actual_temps - (sunspot model + co2 model)
+    #Here the temperature is the monthly temps, not the moving averaged temps
     err = df_temp.Temperature[ig:] - x_model_comp[ig:len(df_temp)]
+
+    #Perform a moving average on the error.  This is the same as computing the error
+    #between the moving averaged temperature data and the model output.  Only the scale
+    #of the RMS number is affected, it doesn't affect the co2 search algorithm
     if MA>0:
       errrMA = np.convolve(err,np.ones(MA*12)/(MA*12),mode='valid')
       rmserr = rms(errrMA)
@@ -138,8 +145,12 @@ parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advan
 #Best Model with fixed CO2 compensation
 parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.3}  
 
-showModel=True
-firstValidYear = 1900 #ignore the data before 1900 when fitting and computing error
+
+showModel=True   #plots the model over the sunspot data used for the first prediction in 1880
+showParms=False  #displays the parms variable in the plot
+
+firstValidYear = 1900 #ignore the data before 1900 when fitting and computing error, 
+                      #the earliest global temperature and/or sunspot data may be not be that accurate.
 
 # Get the temperature and sunspot datasets
 [df_temp,df_ss] = getTempSunspotData(useLocal = True, plotData=False)
@@ -148,7 +159,7 @@ firstValidYear = 1900 #ignore the data before 1900 when fitting and computing er
 tempMA = np.convolve(df_temp.Temperature,np.ones(parms['MA']*12)/(parms['MA']*12),mode='valid')
 t_tempMA = np.arange(len(tempMA))/12+df_temp.Year[0]+parms['MA']/2
 
-# modify the amplitude and offset of the sunspot data to make it easier to work with
+# modify the offset of the sunspot data to make it easier to work with
 x_ss = df_ss.Sunspots.values
 x_ss -= np.mean(x_ss)
 if parms['M42']:
@@ -157,41 +168,44 @@ if parms['M42']:
 # get the sunspot-to-temperature model
 model = getModel(parms['modType'],parms['rectW'], parms['rectW2'])
 
-# Use the model to predict the temperature 
+# Use the model to predict the temperature.  Convolve the model with the sunspot data
 x_model = np.convolve(x_ss,model,mode='valid')
 
-advance =  parms['advance']  #for convinience
+advance =  parms['advance']  #convenience variable
 
 #truncate the data prior to the first year in df_temp
 x_model = x_model[-(len(df_temp)+12*advance):]
 #create a time index
 t_model = np.arange(len(x_model))/12+df_temp.Year[0]
 
-# Search for the co2 compensation which produces the lowest RMS error
-bestCO2comp=0
-bestRMSerr = 1e6
-comps = np.arange(40)/40
-rmserrs = []
-for co2Comp in comps:
-    [x_temp,x_model_comp,co2Model,rmserr] = computeTemps(df_temp,x_model,co2Comp,advance,parms['MA'])
-    rmserrs.append(rmserr)
-    if rmserr < bestRMSerr:
-        bestRMSerr = rmserr
-        bestCO2comp = co2Comp
 
 if parms['co2comp']>=0:  #use the co2comp param instead of best fit for final plots
     bestCO2comp= parms['co2comp']
 
-# recompute the prediction using the best compensation
+else: # Search for the co2 compensation which produces the lowest RMS error
+    bestCO2comp=0
+    bestRMSerr = 1e6
+    comps = np.arange(40)/40
+    rmserrs = []
+    for co2Comp in comps:
+        [x_temp,x_model_comp,co2Model,rmserr] = computeTemps(df_temp,x_model,co2Comp,advance,parms['MA'])
+        rmserrs.append(rmserr)
+        if rmserr < bestRMSerr:
+            bestRMSerr = rmserr
+            bestCO2comp = co2Comp
+
+# compute the prediction using the best co2 compensation
 [x_temp,x_model_comp,co2Model,rmserr] = computeTemps(df_temp,x_model,bestCO2comp,advance,parms['MA'])
 
 # Plot the results
 
 fig = plt.figure(constrained_layout=True)
-fig.suptitle(str(parms))
+if showParms:
+    fig.suptitle(str(parms))
 gs = fig.add_gridspec(3, 3)
-if showModel:
-   if parms['co2comp']<0:  #use the co2comp param instead of best fit for final plots
+
+if showModel: #show the model above the temps
+   if parms['co2comp']<0:  #show the co2 optimization next to the model
      ax_ss = fig.add_subplot(gs[0,0:2])
      ax_fit = fig.add_subplot(gs[0,2])
    else:
@@ -199,11 +213,11 @@ if showModel:
 
    ax_temp = fig.add_subplot(gs[1:,0:])
 else:
-   if parms['co2comp']<0:  #use the co2comp param instead of best fit for final plots
+   if parms['co2comp']<0:  #show the co2 optimization above the temps
        ax_fit = fig.add_subplot(gs[0,0:])
        ax_temp = fig.add_subplot(gs[1:,0:])
-   else:
-       ax_temp = fig.add_subplot(gs[0:,0:])
+   else: #only show the temperatures
+       ax_temp = fig.add_subplot(gs[0:,0:])  
 
 if showModel:
    ax_ss.set_title('Sunspots -  Source: WDC-SILSO, Royal Observatory of Belgium, Brussels')
@@ -214,19 +228,18 @@ if showModel:
    ax_model.plot((np.arange(len(plotmodel))-len(plotmodel))/12+1880-parms['advance'],plotmodel,'b',label='Model')
    ax_model.legend()
 
-if parms['co2comp']<0:  #use the co2comp param instead of best fit for final plots
+if parms['co2comp']<0:  #plot the co2 optimization
    ax_fit.set_title('Model Error vs CO2 Compensation ('+str(parms['MA'])+'Yr MA)')
    ax_fit.set_ylabel('RMS error °C')
    ax_fit.set_xlabel('CO2 compensation °C')
    ax_fit.grid()
    ax_fit.plot(comps,rmserrs)
 
-#tempMA = np.convolve(x_temp,np.ones(36)/36,mode='valid')
+#plot the temperatures
 ax_temp.set_title('Temperature Anomalies ')
 ax_temp.plot(df_temp.Year,df_temp.Temperature,'.8',label='NOAA Global Temp Anomaly')
 ax_temp.plot(t_tempMA,tempMA,'r',label='Temp '+str(parms['MA'])+' Yr Moving Average')
 ax_temp.plot(t_model,co2Model(t_model),'.1',dashes=[4,4],label='CO2 Compensation: '+str(bestCO2comp)+'°C')
-#ax_temp.plot(t_model,x_model+co2Model(t_model),'b',label='Sunspot + CO2 Model')
 ax_temp.set_ylabel('°C')
 ax_temp.set_xlabel('Year')
 ax_temp.plot(t_model,x_model_comp,'b',label='Sunspot + CO2 Model Prediction')
