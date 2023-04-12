@@ -1,5 +1,5 @@
 # Global Warming
-A simple, but surprisingly accurate model for predicting global temperatures using using sunspots and CO2 concentrations.
+A simple, but surprisingly accurate model for predicting global temperatures using using sunspots and CO2 concentrations. Volcanic activity and climate oscillations will cause the actual temperature to fluctuate around the prediction.
 
 ![Plot](./TempPrediction.png)
 
