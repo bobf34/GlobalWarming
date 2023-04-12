@@ -26,17 +26,17 @@ def elevenYrNotch():
         y=signal.firwin(ln*12+1,[2*(fc-bw)/12,2*(fc+bw)/12])
         # Modify the filter to limit the amount of attenuation in the stopband
         g = 1.3
-        y[int(len(y)/2)] *=g
+        y[int(len(y)/2)] *=g 
         y /=g
         return y
 
-def lifeTheUniverseAndEverything(df_ss,x_ss,gain=0.8):
+def lifeTheUniverseAndEverything(df_ss,x_ss,gain=0.8,f = 0.024169921875):
     # The model needs a partial null at the 42 year cycle.  Unfortunately the impulse response would make the model
     # filter very long. Too long to use, in fact. So, instead, a sinusoid is injected to cancel most of the signal 
     # before it gets to the model.  Not a great solution, but it works.
-    f = 0.024169921875  #~ 1/42  frequency of the 42 year sunspot cycle
+    #f = 0.024169921875  #~ 1/42  frequency of the 42 year sunspot cycle
     [g,phi] = getToneMagPhase(df_ss,x_ss,f)
-    x42 = g*np.cos(2*np.pi*f*df_ss.Year+ phi)
+    x42 = g*np.cos(2*np.pi*f*(df_ss.Year-df_ss.Year[0])+ phi)
     x_ss -= gain*x42
     return x_ss
 
@@ -47,7 +47,7 @@ def getToneMagPhase(df_ss,x_ss,f):
     x = np.pad(x_ss,(0,padLen))
     X = fft(x)
     g = 2*np.abs(X[fbin])/len(df_ss)  #fftSize/len(df_ss) * X[fbin]/(fftSize/2)
-    phi = -np.angle(X[fbin])
+    phi = np.angle(X[fbin])
     return [g,phi]
     
 
@@ -162,8 +162,10 @@ t_tempMA = np.arange(len(tempMA))/12+df_temp.Year[0]+parms['MA']/2
 # modify the offset of the sunspot data to make it easier to work with
 x_ss = df_ss.Sunspots.values
 x_ss -= np.mean(x_ss)
+testF = .23
+t = np.arange(len(df_ss))/12
 if parms['M42']:
-   x_ss = lifeTheUniverseAndEverything(df_ss,x_ss,0.8)  #attenuate the 42 year sunspot cycle
+   x_ss = lifeTheUniverseAndEverything(df_ss,x_ss,0.9)  #attenuate the 42 year sunspot cycle
 
 # get the sunspot-to-temperature model
 model = getModel(parms['modType'],parms['rectW'], parms['rectW2'])
