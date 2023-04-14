@@ -145,7 +145,7 @@ parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advan
 parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.3}  
 
 
-showExtra='model'  #'model' plots the model over the sunspot data used for the first prediction in 1880
+showExtra='error'  #'model' plots the model over the sunspot data used for the first prediction in 1880
                    #'error' plots the error over the prediction
                    # False  for no extra plot
 showParms=False  #displays the parms variable in the plot
@@ -156,7 +156,7 @@ firstValidYear = 1895 #ignore the data before 1895 when fitting and computing er
 # Get the temperature and sunspot datasets
 [df_temp,df_ss] = getTempSunspotData(useLocal = True, plotData=False)
 
-#create a 3yr moving average of the temperature data for plotting purposes
+#create a 3yr moving average of the temperature data for plotting and prediction error purposes
 if parms['MA']>0:
     tempMA = np.convolve(df_temp.Temperature,np.ones(parms['MA']*12)/(parms['MA']*12),mode='valid')
     t_tempMA = np.arange(len(tempMA))/12+df_temp.Year[0]+parms['MA']/2
@@ -167,7 +167,6 @@ else:  #use unaveraged global temperature
 # modify the offset of the sunspot data to make it easier to work with
 x_ss = df_ss.Sunspots.values
 x_ss -= np.mean(x_ss)
-testF = .23
 t = np.arange(len(df_ss))/12
 if parms['M42']:
    x_ss = lifeTheUniverseAndEverything(df_ss,x_ss,0.9)  #attenuate the 42 year sunspot cycle
