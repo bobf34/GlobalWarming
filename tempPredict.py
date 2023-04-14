@@ -68,13 +68,13 @@ def getModel(modelType,rectW, rectW2):
     model /= np.sum(model)    
     return(model)
 
-def computeTemps(df_temp,x_model,co2comp,advance,MA=1):
+def computeTemps(df_temp,df_tempMA,x_model,co2comp,advance,MA=1):
     # co2 compensate the temperature data from the dataset, i.e. remove co2 warming
     co2Model = getCO2model(co2comp)
     co2 = co2Model(df_temp.Year)  #the model
     x_temp = df_temp.Temperature - co2
 
-    # ignore data prior to 1900 for fitting and error computations.  
+    # ignore data prior to 1895 for fitting and error computations.  
     ig = int((firstValidYear - df_temp.Year[0])*12)
 
     #find scale and offset that minimizes  err = (actual_temps-co2) - (scale*predictions + offset)
@@ -86,19 +86,18 @@ def computeTemps(df_temp,x_model,co2comp,advance,MA=1):
     x_model_comp =  scale*x_model + offset
     x_model_comp += co2Model(t_model)
 
-    #now compute the remaining error as actual_temps - (sunspot model + co2 model)
-    #Here the temperature is the monthly temps, not the moving averaged temps
-    err = df_temp.Temperature[ig:] - x_model_comp[ig:len(df_temp)]
+    #now compute the remaining error as moving averaged actual_temps - (sunspot model + co2 model) 
+    #skip everything before firstValidYear
+    idx1 =np.where(df_tempMA.Year>=firstValidYear)[0]
+    idx2 =np.where((df_temp.Year>=firstValidYear)&(df_temp.Year <=df_tempMA.Year.iloc[-1]))[0]
+    rmserr = rms(df_tempMA.Temperature[idx1] - x_model_comp[idx2])
 
-    #Perform a moving average on the error.  This is the same as computing the error
-    #between the moving averaged temperature data and the model output.  Only the scale
-    #of the RMS number is affected, it doesn't affect the co2 search algorithm
-    if MA>0:
-      errrMA = np.convolve(err,np.ones(MA*12)/(MA*12),mode='valid')
-      rmserr = rms(errrMA)
-    else:
-      rmserr = rms(err)
-    return [x_temp,x_model_comp,co2Model,rmserr]
+    #comppute the error over the entire moving average for display purposes and save in a dataframe
+    err = df_tempMA.Temperature - x_model_comp[MA*6:MA*6+len(df_tempMA)]
+    df_err = {'error': err, 'Year': df_tempMA.Year}
+    df_err = pd.DataFrame(df_err)
+
+    return [x_temp,x_model_comp,co2Model,df_err,rmserr]
 
 
 
@@ -146,18 +145,24 @@ parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advan
 parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.3}  
 
 
-showModel=True   #plots the model over the sunspot data used for the first prediction in 1880
+showExtra='model'  #'model' plots the model over the sunspot data used for the first prediction in 1880
+                   #'error' plots the error over the prediction
+                   # False  for no extra plot
 showParms=False  #displays the parms variable in the plot
 
-firstValidYear = 1900 #ignore the data before 1900 when fitting and computing error, 
+firstValidYear = 1895 #ignore the data before 1895 when fitting and computing error, 
                       #the earliest global temperature and/or sunspot data may be not be that accurate.
 
 # Get the temperature and sunspot datasets
 [df_temp,df_ss] = getTempSunspotData(useLocal = True, plotData=False)
 
 #create a 3yr moving average of the temperature data for plotting purposes
-tempMA = np.convolve(df_temp.Temperature,np.ones(parms['MA']*12)/(parms['MA']*12),mode='valid')
-t_tempMA = np.arange(len(tempMA))/12+df_temp.Year[0]+parms['MA']/2
+if parms['MA']>0:
+    tempMA = np.convolve(df_temp.Temperature,np.ones(parms['MA']*12)/(parms['MA']*12),mode='valid')
+    t_tempMA = np.arange(len(tempMA))/12+df_temp.Year[0]+parms['MA']/2
+    df_tempMA = pd.DataFrame( {'Year':t_tempMA,'Temperature':tempMA})
+else:  #use unaveraged global temperature 
+    df_tempMA = df_temp
 
 # modify the offset of the sunspot data to make it easier to work with
 x_ss = df_ss.Sunspots.values
@@ -183,52 +188,66 @@ t_model = np.arange(len(x_model))/12+df_temp.Year[0]
 
 if parms['co2comp']>=0:  #use the co2comp param instead of best fit for final plots
     bestCO2comp= parms['co2comp']
-
 else: # Search for the co2 compensation which produces the lowest RMS error
     bestCO2comp=0
     bestRMSerr = 1e6
     comps = np.arange(40)/40
     rmserrs = []
     for co2Comp in comps:
-        [x_temp,x_model_comp,co2Model,rmserr] = computeTemps(df_temp,x_model,co2Comp,advance,parms['MA'])
+        [x_temp,x_model_comp,co2Model,df_err,rmserr] = computeTemps(df_temp,df_tempMA,x_model,co2Comp,advance,parms['MA'])
         rmserrs.append(rmserr)
         if rmserr < bestRMSerr:
             bestRMSerr = rmserr
             bestCO2comp = co2Comp
 
-# compute the prediction using the best co2 compensation
-[x_temp,x_model_comp,co2Model,rmserr] = computeTemps(df_temp,x_model,bestCO2comp,advance,parms['MA'])
+# scale the prediction and add co2 compensation to model
+[x_temp,x_model_comp,co2Model,df_err,rmserr] = computeTemps(df_temp,df_tempMA,x_model,bestCO2comp,advance,parms['MA'])
 
-# Plot the results
 
+###### PLOT THE RESULTs #####
 fig = plt.figure(constrained_layout=True)
 if showParms:
     fig.suptitle(str(parms))
 gs = fig.add_gridspec(3, 3)
 
-if showModel: #show the model above the temps
-   if parms['co2comp']<0:  #show the co2 optimization next to the model
-     ax_ss = fig.add_subplot(gs[0,0:2])
+if showExtra in ['model','error'] : #show the model above the temps
+   if parms['co2comp']<0:  #show the co2 optimization next to the model or error plot
+     ax_extra = fig.add_subplot(gs[0,0:2])
      ax_fit = fig.add_subplot(gs[0,2])
    else:
-     ax_ss = fig.add_subplot(gs[0,0:])
+     ax_extra = fig.add_subplot(gs[0,0:])
 
    ax_temp = fig.add_subplot(gs[1:,0:])
 else:
-   if parms['co2comp']<0:  #show the co2 optimization above the temps
+   if parms['co2comp']<0:  #show the co2 optimization search above the temps
        ax_fit = fig.add_subplot(gs[0,0:])
        ax_temp = fig.add_subplot(gs[1:,0:])
    else: #only show the temperatures
        ax_temp = fig.add_subplot(gs[0:,0:])  
 
-if showModel:
-   ax_ss.set_title('Sunspots -  Source: WDC-SILSO, Royal Observatory of Belgium, Brussels')
-   ax_ss.plot(df_ss.Year,df_ss.Sunspots,'.7',label='Sunspots')
+if showExtra == 'model': #plot the model positioned over the sunspot data used to produce the first 1880 prediction
+   ax_extra.set_title('Sunspots -  Source: WDC-SILSO, Royal Observatory of Belgium, Brussels')
+   ax_extra.plot(df_ss.Year,df_ss.Sunspots,'.7',label='Sunspots')
 
-   ax_model = ax_ss.twinx()
+   ax_model = ax_extra.twinx()
    plotmodel = np.pad(model,1)  #zero pad for plotting purposes
    ax_model.plot((np.arange(len(plotmodel))-len(plotmodel))/12+1880-parms['advance'],plotmodel,'b',label='Model')
    ax_model.legend()
+
+elif showExtra == 'error': # plot prediction error
+   splitYear=2000  # new satellites with better temperature sensors were launched around 2000
+   idx1 =np.where((df_err.Year>firstValidYear) & (df_err.Year<splitYear))
+   rms1= rms(df_err.error.values[idx1])
+   idx2 = np.where((df_err.Year>splitYear))
+   rms2= rms(df_err.error.values[idx2])
+   ax_extra.grid()
+   ax_extra.set_ylabel('Error Magnitude °C')
+   ax_extra.set_title('Temperature Prediction Error')
+   ax_extra.plot(df_err.Year,np.abs(df_err.error),label = '|Error|')
+   ax_extra.plot(df_err.Year.values[idx1],rms1*np.ones(len(idx1[0])),'r',dashes=[1,1],label='RMS:'+'{:.3f}'.format(rms1))
+   ax_extra.plot(df_err.Year.values[idx2],rms2*np.ones(len(idx2[0])),'r',dashes=[4,1],label='RMS:'+'{:.3f}'.format(rms2))
+   ax_extra.legend()
+
 
 if parms['co2comp']<0:  #plot the co2 optimization
    ax_fit.set_title('Model Error vs CO2 Compensation ('+str(parms['MA'])+'Yr MA)')
@@ -240,7 +259,7 @@ if parms['co2comp']<0:  #plot the co2 optimization
 #plot the temperatures
 ax_temp.set_title('Temperature Anomalies ')
 ax_temp.plot(df_temp.Year,df_temp.Temperature,'.8',label='NOAA Global Temp Anomaly')
-ax_temp.plot(t_tempMA,tempMA,'r',label='Temp '+str(parms['MA'])+' Yr Moving Average')
+ax_temp.plot(df_tempMA.Year,df_tempMA.Temperature,'r',label='Temp '+str(parms['MA'])+' Yr Moving Average')
 ax_temp.plot(t_model,co2Model(t_model),'.1',dashes=[4,4],label='CO2 Compensation: '+str(bestCO2comp)+'°C')
 ax_temp.set_ylabel('°C')
 ax_temp.set_xlabel('Year')
