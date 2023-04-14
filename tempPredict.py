@@ -11,8 +11,9 @@ def rms(x):
     return np.sqrt(np.mean(np.square(x)))
 
 def getCO2model(scale=1):
-    # model was fit to combined Maui and ice-core datasets. For years beteen 1880 and now, returns a value
+    # model was fit to combined Maui and ice-core datasets. For years beteen 1880 and  Nov 2020, returns a value
     # between zero and scale.  The shape is based on the log of CO2 concentrations
+    # use of a model allows the co2 compensation to extend into the future beyond existing co2 measurements
     polyco2 = [ 3.73473114e-07, -2.12676942e-03,  4.03870559e+00, -2.55744899e+03]
     co2Model = np.poly1d([x*scale for x in polyco2])
     return co2Model
@@ -68,7 +69,7 @@ def getModel(modelType,rectW, rectW2):
     model /= np.sum(model)    
     return(model)
 
-def computeTemps(df_temp,df_tempMA,x_model,co2comp,advance,MA=1):
+def computeTemps(df_temp,df_tempMA,df_model,co2comp,advance,MA=1):
     # co2 compensate the temperature data from the dataset, i.e. remove co2 warming
     co2Model = getCO2model(co2comp)
     co2 = co2Model(df_temp.Year)  #the model
@@ -79,11 +80,11 @@ def computeTemps(df_temp,df_tempMA,x_model,co2comp,advance,MA=1):
 
     #find scale and offset that minimizes  err = (actual_temps-co2) - (scale*predictions + offset)
     if advance>0:
-               [scale,offset] =  np.polyfit(x_model[ig:-12*advance],x_temp[ig:],1)
+               [scale,offset] =  np.polyfit(df_model.Temperature[ig:-12*advance],x_temp[ig:],1)
     else:
-               [scale,offset] =  np.polyfit(x_model[ig:],x_temp[ig:],1)
+               [scale,offset] =  np.polyfit(df_model.Temperature[ig:],x_temp[ig:],1)
     # apply the scale and offset correction and then add the co2 contribution into the model 
-    x_model_comp =  scale*x_model + offset
+    x_model_comp =  scale*df_model.Temperature.values + offset  #WARNING:  Precision seems better with .values
     x_model_comp += co2Model(t_model)
 
     #now compute the remaining error as moving averaged actual_temps - (sunspot model + co2 model) 
@@ -97,13 +98,50 @@ def computeTemps(df_temp,df_tempMA,x_model,co2comp,advance,MA=1):
     df_err = {'error': err, 'Year': df_tempMA.Year}
     df_err = pd.DataFrame(df_err)
 
-    return [x_temp,x_model_comp,co2Model,df_err,rmserr]
+    #df_model_comp = pd.DataFrame({'Year':df_temp.Year,'Temperature':x_model_comp})
+    df_model_comp = pd.DataFrame({'Year':df_model.Year,'Temperature':x_model_comp})
+    return [df_model_comp,co2Model,df_err,rmserr]
 
+def decYearToYrMo(decYr):
+    #convert date of the form 1880.041667 to 188001  
+    x = np.modf(decYr)
+    return (x[1]*100 + (x[0]-1/24)*12+1).astype(int)
+
+def saveResultsCSV(df_temp,df_tempMA,df_model_comp,df_err,co2Model,fname):
+    dft = df_temp.copy()
+    dft['YrMo']=decYearToYrMo(dft.Year)
+    dft.drop(['Year'], axis=1,inplace=True)
+
+    dftMA = df_tempMA.rename(columns={"Temperature": "TempMovAvg"},inplace=False)
+    dftMA['YrMo']=decYearToYrMo(dftMA.Year)
+    dftMA.drop(['Year'], axis=1,inplace=True)
+
+    dferr = df_err.copy()
+    dferr['YrMo']=decYearToYrMo(dferr.Year)
+    dferr.drop(['Year'], axis=1,inplace=True)
+
+    df_output = df_model_comp.rename(columns={"Temperature": "PredictedTemp"},inplace=False)
+    df_output['YrMo']=decYearToYrMo(df_output.Year)
+
+    #merge on YrMo 
+    df_output = pd.merge(df_output,dft,how='outer',on='YrMo')
+    df_output = pd.merge(df_output,dftMA,how='outer',on='YrMo')
+    df_output = pd.merge(df_output,dferr,how='outer',on='YrMo')
+
+    #add a co2 column
+    df_output['co2comp'] = co2Model(df_output.Year)
+
+    #re-order the columns
+    df_output = df_output[['YrMo','Year','Temperature','TempMovAvg','PredictedTemp','error','co2comp']]
+    df_output.to_csv(fname,index=False)
 
 
 ###################################################################################################
 
+'''
 parms = {
+        'modelName':'MyModel', #Appears on plots
+        'fname':'predictionResults.csv', #filename to save results, use empty string for no save
         'modType':'RECT2',  # choices are RECT,RECT2, or NOTCH
         'rectW':99,    #width in years of the moving average nom:99
         'rectW2':11.1, #width of the short RECT, ignored for RECT and NOTCH model types
@@ -113,7 +151,6 @@ parms = {
         'co2comp':-1, #amount of co2 compensation degC  set negative for automatic selection
         }
 
-'''
 About the model types
                                                                                            _____
    RECT is a single boxcar shape which is the functional equivalent of a moving average  _|     |_
@@ -124,34 +161,50 @@ About the model types
    just accomplishes this with a bit more finesse.
 
 #BASIC MODEL 99-year moving average predicts 13 years into future
-parms = {'modType':'RECT','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 'advance':13, 'co2comp':0}  
+parms = {'modelName':'Basic: 99', 'fname':'',
+         'modType':'RECT','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 'advance':13, 'co2comp':0}  
 
-#Improved Model 1, adds 11 year moving average predicts 8 years into future
-parms = {'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 'advance':8, 'co2comp':0}  
+#Improved Model 1, adds 11-year moving average predicts 8 years into future
+parms = {'modelName':'Model 1: 99-11','fname':'',
+         'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 'advance':8, 'co2comp':0}  
 
-#Improved Model 2, replaces 11 year moving average with notch filter
-parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 'advance':0, 'co2comp':0.0}  
+#Improved Model 2:  Best for future prediction Adds compensation for 42
+parms = {'modelName':'Model 2: 99-11-42 Best for future prediction','fname':'',
+         'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':8, 'co2comp':0}  
 
-#BEST Model adds compensation for 42 year sunspot cycle 
-parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.0}  
+#Improved Model 3, replaces 11 year moving average with notch filter, no 42-year comp
+parms = {'modelName':'Improved Model 3: 99-N','fname':'',
+         'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 'advance':0, 'co2comp':0.0}  
 
-#Best Model with fixed CO2 compensation
-parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.3}  
+#BEST Model adds Notch and compensation for 42 year sunspot cycle No CO2
+parms = {'modelName':'Best Model: 99-N-42','fname':'',
+         'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.0}  
 
-#Best Model with search for best CO2 compensation
-parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':-1}  
+#Best Model with Notch, 42-year and fixed CO2 compensation
+parms = {'modelName':'Best Model: 99-N-42-fixed CO2','fname':'',
+         'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.3}  
+
+#Best Model with Notch, 42-year and search for best CO2 compensation
+parms = {'modelName':'Best Model: 99-N-42 CO2 search','fname':'',
+         'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':-1}  
 '''
 #Best Model with fixed CO2 compensation
-parms = {'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.3}  
+parms = {'modelName':'Best Model with fixed CO2','fname':'',
+         'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.3}  
+
 
 
 showExtra='error'  #'model' plots the model over the sunspot data used for the first prediction in 1880
                    #'error' plots the error over the prediction
                    # False  for no extra plot
-showParms=False  #displays the parms variable in the plot
+
+showModelName = True  #displays the model name
+showParms=False       #displays the parms variable 
 
 firstValidYear = 1895 #ignore the data before 1895 when fitting and computing error, 
                       #the earliest global temperature and/or sunspot data may be not be that accurate.
+splitYear=2000        # new satellites with better temperature sensors were launched around 2000 used for error plot only
+                      # to show RMS error over two different time periods
 
 # Get the temperature and sunspot datasets
 [df_temp,df_ss] = getTempSunspotData(useLocal = True, plotData=False)
@@ -167,7 +220,7 @@ else:  #use unaveraged global temperature
 # modify the offset of the sunspot data to make it easier to work with
 x_ss = df_ss.Sunspots.values
 x_ss -= np.mean(x_ss)
-t = np.arange(len(df_ss))/12
+
 if parms['M42']:
    x_ss = lifeTheUniverseAndEverything(df_ss,x_ss,0.9)  #attenuate the 42 year sunspot cycle
 
@@ -181,8 +234,12 @@ advance =  parms['advance']  #convenience variable
 
 #truncate the data prior to the first year in df_temp
 x_model = x_model[-(len(df_temp)+12*advance):]
+
 #create a time index
 t_model = np.arange(len(x_model))/12+df_temp.Year[0]
+
+# combine the time index with the uncompensated prediction
+df_model = pd.DataFrame( {'Year':t_model,'Temperature':x_model})
 
 
 if parms['co2comp']>=0:  #use the co2comp param instead of best fit for final plots
@@ -193,21 +250,29 @@ else: # Search for the co2 compensation which produces the lowest RMS error
     comps = np.arange(40)/40
     rmserrs = []
     for co2Comp in comps:
-        [x_temp,x_model_comp,co2Model,df_err,rmserr] = computeTemps(df_temp,df_tempMA,x_model,co2Comp,advance,parms['MA'])
+        [df_model_comp,co2Model,df_err,rmserr] = computeTemps(df_temp,df_tempMA,df_model,co2Comp,advance,parms['MA'])
         rmserrs.append(rmserr)
         if rmserr < bestRMSerr:
             bestRMSerr = rmserr
             bestCO2comp = co2Comp
 
 # scale the prediction and add co2 compensation to model
-[x_temp,x_model_comp,co2Model,df_err,rmserr] = computeTemps(df_temp,df_tempMA,x_model,bestCO2comp,advance,parms['MA'])
+[df_model_comp,co2Model,df_err,rmserr] = computeTemps(df_temp,df_tempMA,df_model,bestCO2comp,advance,parms['MA'])
 
+if parms['fname']:
+    saveResultsCSV(df_temp,df_tempMA,df_model_comp,df_err,co2Model,fname=parms['fname'])
 
 ###### PLOT THE RESULTs #####
 fig = plt.figure(constrained_layout=True)
-if showParms:
+if showParms and showModelName and parms['modelName']:
+    fig.suptitle(parms['modelName']+': '+str(parms))
+elif showParms and parms['modelName']:
     fig.suptitle(str(parms))
+elif showModelName:
+    fig.suptitle(parms['modelName'])
 gs = fig.add_gridspec(3, 3)
+
+
 
 if showExtra in ['model','error'] : #show the model above the temps
    if parms['co2comp']<0:  #show the co2 optimization next to the model or error plot
@@ -234,7 +299,6 @@ if showExtra == 'model': #plot the model positioned over the sunspot data used t
    ax_model.legend()
 
 elif showExtra == 'error': # plot prediction error
-   splitYear=2000  # new satellites with better temperature sensors were launched around 2000
    idx1 =np.where((df_err.Year>firstValidYear) & (df_err.Year<splitYear))
    rms1= rms(df_err.error.values[idx1])
    idx2 = np.where((df_err.Year>splitYear))
@@ -262,7 +326,7 @@ ax_temp.plot(df_tempMA.Year,df_tempMA.Temperature,'r',label='Temp '+str(parms['M
 ax_temp.plot(t_model,co2Model(t_model),'.1',dashes=[4,4],label='CO2 Compensation: '+str(bestCO2comp)+'°C')
 ax_temp.set_ylabel('°C')
 ax_temp.set_xlabel('Year')
-ax_temp.plot(t_model,x_model_comp,'b',label='Sunspot + CO2 Model Prediction')
+ax_temp.plot(df_model_comp.Year,df_model_comp.Temperature,'b',label='Sunspot + CO2 Model Prediction')
 ax_temp.grid()
 ax_temp.legend()
 
