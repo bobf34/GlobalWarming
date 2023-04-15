@@ -260,7 +260,7 @@ parms = {'modelName':'Best Model: 99-N-42 CO2 search','fname':'',
          'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':-1}  
 '''
 #Best Model with fixed CO2 compensation
-parms = {'modelName':'Best Model: 99-N-42-fixed CO2','fname':'foo2.csv',
+parms = {'modelName':'Best Model: 99-N-42-fixed CO2','fname':'',
          'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 'advance':0, 'co2comp':0.28}  
 
 showExtra='error'  #'model' plots the model over the sunspot data used for the first prediction in 1880
