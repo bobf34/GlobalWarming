@@ -17,6 +17,9 @@ A variable called *showExtra* can be configured to show the model, or the predic
 ### Required Datasets
 The first time you run the program it will automatically download the two required datasets.
 
+### Model Description
+Watch This Space
+
 ### Data Credits
 Sunspot Data: WDC-SILSO, [Royal Observatory of Belgium, Brussels](https://www.sidc.be/silso/datafiles)
 <br>
