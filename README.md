@@ -10,6 +10,8 @@ Run tempPredict.py
 
 ### Changing the model
 There are several different preconfigured models in a comment block.  Copy the desired model *parms* dictionary and replace (or place below) the parms dictionary located just below the comment block.  You can also create your own model by adjusting the parameters of an existing model.
+<br><br>
+Image (png) files showing predictions for a few of the models have been uploaded into this codespace. Click on the filename to view.
 
 ### Selecting Plots
 A variable called *showExtra* can be configured to show the model, or the prediction error.
