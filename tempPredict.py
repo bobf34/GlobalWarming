@@ -27,8 +27,8 @@ parms = {
         'M42':True,    #compensate for the 42-year cycle
         'f42parms': f42parms1  #parameters which control the 42-year cycle suppression
         'f11parms': f11parms1, #parameters which control the design of the 11-year notch filter
-         'weightedFit':False  #Optional override of global variable. See variable for description
-         'useRMSweight':True  #Optional override of global variable. See variable for description
+        'weightedFit':False  #Optional override of global variable. See variable for description
+        'useRMSweight':True  #Optional override of global variable. See variable for description
         'advance':15,  #amount in yearss to forward shift model output (i.e. years of prediction beyond sunspot data
         'co2comp':-1,  #amount of co2 compensation degC  set negative for automatic selection
         }
@@ -48,19 +48,19 @@ parms = {'modelName':'1: CO2 Only Model','fname':'', 'modType':'NONE',
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':0, 'co2comp':-1}  
 
 #BASIC MODEL 99-year moving average predicts 13 years into future
-parms = {'modelName':'2: Basic: 99', 'fname':'',
+parms = {'modelName':'2: Basic: 99-Year Moving Average Model', 'fname':'',
          'modType':'RECT','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':13, 'co2comp':0}  
 
-#Improved Model 1, adds 11-year moving average predicts 8 years into future
+#Improved Model 2, adds 11-year moving average predicts 8 years into future
 parms = {'modelName':'3: Model 99-11','fname':'',
          'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':8, 'co2comp':0}  
 
-# Improved Model 2:  Best for future prediction Adds compensation for 42
-parms = {'modelName':'4: Winner: Best Model for Future Prediction with CO2','fname':'bestFuturePredict.csv',
+# Improved Model 3:  Best for future prediction Adds compensation for 42
+parms = {'modelName':'4: : Best Model for Future Prediction without CO2','fname':'bestFuturePredict.csv',
          'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':8, 'co2comp':-1}  
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':8, 'co2comp':0}  
 
 #>>>>>>>>>  Model 4 with CO2:  <<<<<<<<<<<<<
 parms = {'modelName':'5: Winner: Best Model for Future Prediction with CO2','fname':'bestFuturePredict.csv',
@@ -102,7 +102,7 @@ parms = {'modelName':'10: Winner -- Overall Best Model','fname':'bestOverallMode
 
 saveResults = False  #If true and fname is defined in parms, the output results are saved into a CSV file
 
-showExtra='error'  # 'model' plots the model over the sunspot data used for the first prediction in 1880
+showExtra='model'  # 'model' plots the model over the sunspot data used for the first prediction in 1880
                    # 'error' plots the error over the prediction
                    #  Use empty string '' for no extra plot
 
