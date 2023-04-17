@@ -100,24 +100,25 @@ parms = {'modelName':'10: Winner -- Overall Best Model','fname':'bestOverallMode
          'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':True, 'co2comp':0.28}  
 
-saveResults = False  #If true and fname is defined in parms, the output results into a CSV file
+saveResults = False  #If true and fname is defined in parms, the output results are saved into a CSV file
 
 showExtra='error'  # 'model' plots the model over the sunspot data used for the first prediction in 1880
                    # 'error' plots the error over the prediction
                    #  Use empty string '' for no extra plot
+
 showModelName = True  # Displays the model name in the plots. Default True
 showParms = False     # Ddisplays the parms variable. Default False
-optimalCO2 = True     # If co22comp is negative, simultaneously fit sunspot and co2 models, otherwise search and plot search outpu
-                      # In otherwords, to see the shape of the fit, set this variable to False and co2comp to -1
-                      # The results may change if weighted fitting is used.
+optimalCO2 = True     # If True and co22comp is negative, simultaneously fit sunspot and co2 models, # otherwise search 
+                      # and plot search output. Note: The results may change if weighted fitting is used.
 
 firstValidYear = 1895 # Ignore the data before 1895 when fitting and computing error, 
                       # The earliest global temperature and/or sunspot data may be not be that accurate.
-splitYear=2000        # New satellites with better temperature sensors were launched around 2000 used for error plot only
-                      # This might explain the sudden change in the variance of the error
-                      # to show RMS error over two different time periods when showExtra = 'error'
+splitYear=2000        # New satellites with better temperature sensors were launched around 2000 which might
+                      # explain the sudden change in the variance of the error.  On the error plot, the RMS error
+                      # is computed both before and after splitYear.  When a weighted LMS fit is used, the statistics
+                      # of the error before and after this date are used to weight the fit.
 weightedFit = False   # Perform a weighted LMS fit (only if sklearn is installed)  Default: False
-useRMSweight = True   # If False, use variance to weight the fit. Variance overfits Default True
+useRMSweight = True   # If False, use variance to weight the fit. Default True  Note: Variance overfits the data
 
 #Allow these globals to be overridden in parms dictionary
 if 'weightedFit' in parms:
@@ -129,15 +130,16 @@ if 'useRMSweight' in parms:
 ###################################################################################################
 
 def rms(x):
-    #returns root-mean-square scalar for vector (array) x
-    #return np.sqrt(np.mean(np.square(x)))
-    #return np.sqrt(np.var(x))
+    #returns root-mean-square scalar for vector (array) 
+    # so many choices....
+    #  return np.sqrt(np.mean(np.square(x)))
+    #  return np.sqrt(np.var(x))
     return np.std(x)
 
 def getCO2model(scale=1):
     # model was fit to combined Maui and ice-core datasets. For years between 1880 and Nov 2020, returns a value
     # between zero and scale.  The shape is based on the log of CO2 concentrations
-    # use of a model allows the co2 compensation to extend into the future beyond existing co2 measurements
+    # This model allows the co2 compensation prediction to extend into the future, beyond existing co2 measurements
     polyco2 = [ 3.73473114e-07, -2.12676942e-03,  4.03870559e+00, -2.55744899e+03]
     co2Model = np.poly1d([x*scale for x in polyco2])
     return co2Model
@@ -150,11 +152,12 @@ def elevenYrNotch(f11parms = {'fc':.0933,'bw':.061,'g':1.3}):
     # Improves accuracy over 11-year moving average
     fc = f11parms['fc']
     bw = f11parms['bw']
-    g =  f11parms['g']  #A value of 1.05 lowers CO2 contribution, but also removes detail.  Some 11-year energy is useful.
+    g =  f11parms['g']  #useful range 1.05 (less detail, lower RMS error) to 1.5 (better match beyond year 2000)
     ln=27 #years  27 is the largest possible without loosing the ability to predict to the end of the sunspot data (in years)
 
     #build the bandstop filter 
     y=signal.firwin(ln*12+1,[2*(fc-bw)/12,2*(fc+bw)/12])
+
     # Modify the filter to limit the amount of attenuation in the stopband
     y[int(len(y)/2)] *=g  #scale the center bin impulse (increase) 
     y /=g                 #scale the entire filter (decrease)
@@ -200,23 +203,25 @@ def getModel(parms):
     rectW2 = parms['rectW2']
 
     W1 = np.ones(int(rectW*12))
-    if modelType == 'NOTCH':
+    if modelType == 'NOTCH':  #Nomial: 11-year notch convoled with 99-year rect
         W2 = elevenYrNotch(parms['f11parms'])
         model = np.convolve(W1,W2,mode='full')
 
-    elif modelType == 'RECT2':
+    elif modelType == 'RECT2': #Nominal 11-year rect convolved with 99-year rect
         W2 = np.ones(int(rectW2*12))
         model = np.convolve(W1,W2,mode='full')
 
-    else: #RECT
+    else: #RECT   #Nominal 99-year rect only.
         model = W1
 
     model /= np.sum(model)    
-    if modelType == 'NONE':
+    if modelType == 'NONE':  #For CO2 only simpulations, set model to all zeros.
         model *= 0
     return(model)
 
 def getDataInFitRegion(df_temp,df_tempMA,df_model,firstValidYear,co2comp=1):
+    # returns the temperature and co2 data in the range from firstValidYear to last year with data.
+    # The moving average ends early, so it determines the last year
     if firstValidYear > df_tempMA.Year[0]:
        fitStartYear = firstValidYear
     else:
@@ -234,25 +239,27 @@ def getDataInFitRegion(df_temp,df_tempMA,df_model,firstValidYear,co2comp=1):
     return [tma,model,co2,year]
 
 def getWeightedFit(err,year,splitYear,X,y):
-   from sklearn.linear_model import LinearRegression
-   #compute index variables based on splitYear
-   region1 = np.where(year<splitYear)
-   region2 = np.where(year>=splitYear)
+    # Performes a weighted fit of the Model(s) to the temperature data and computes the error
+    # returns the model and the error
+    from sklearn.linear_model import LinearRegression
+    #compute index variables based on splitYear
+    region1 = np.where(year<splitYear)
+    region2 = np.where(year>=splitYear)
    
-   #select between weighting based on the RMS, or the variance
-   fcn = rms  # np.var overfits
-   if not useRMSweight:  #warning overfits
-      fcn = np.var
+    #select between weighting based on the RMS, or the variance
+    fcn = rms  # np.var overfits
+    if not useRMSweight:  #warning overfits
+       fcn = np.var
       
-   #construct a weighting vector
-   w1 = fcn(err[np.where(year<splitYear)]) #use of variance overfits
-   w2 = fcn(err[np.where(year>=splitYear)])
-   wghts = np.concatenate((w1* np.ones(len(region1[0])),2* np.ones(len(region2[0]))))
+    #construct a weighting vector
+    w1 = fcn(err[np.where(year<splitYear)]) #use of variance overfits
+    w2 = fcn(err[np.where(year>=splitYear)])
+    wghts = np.concatenate((w1* np.ones(len(region1[0])),2* np.ones(len(region2[0]))))
    
-   #perform the fit and compute the error
-   reg = LinearRegression().fit(X, y,wghts)
-   err = (y - reg.predict(X)) #err is computed over the fit interval
-   return [reg,err]
+    #perform the fit and compute the error
+    reg = LinearRegression().fit(X, y,wghts)
+    err = (y - reg.predict(X)) #err is computed over the fit interval
+    return [reg,err]
 
 def fitSunspotModelToTemp(df_temp,df_tempMA,df_model,co2comp,firstValidYear,splitYear = 0):
     '''
@@ -329,6 +336,7 @@ def fitBothModelsToTemp(df_temp,df_tempMA,df_model,firstValidYear,splitYear):
     return fitParms 
 
 def computeCombinedModelOutput(fitParms, dftemp,df_model):
+    # Combine the co2 and sunspot model predictions, compute the error and return in dataframes
     co2 = co2Model(fitParms['gainCO2'],df_model.Year)
     model = fitParms['gainSS']*df_model.Temperature+fitParms['offset']
     temp = model+co2
