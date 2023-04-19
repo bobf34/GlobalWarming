@@ -110,7 +110,7 @@ parms = {'modelName':'10: Winner -- Overall Best Model','fname':'bestOverallMode
 #>>>>>>>>>>> Best Overall Model. Balances overall RMS error with post 2000 error <<<<<<<<<<<<<<<<<
 parms = {'modelName':'10: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
          'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':True, 'co2comp':0.28}  
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':True, 'co2comp':0.26}  
 
 saveResults = False  #If true and fname is defined in parms, the output results are saved into a CSV file
 
@@ -154,9 +154,9 @@ def rms(x):
 def getCO2model(scale=1):
     # For years between 1880 and Nov 2020, returns a value  between 0.09*scale and scale.  
     # The polynomial is a fit to the temperature data, but the model returns predictions
-    # very close to the log of co2 contributions when similarly scaled.
+    # very close to the log of co2 contributions.
     # This model allows the co2 compensation prediction to extend into the future
-    polyco2 = [ 3.91996394e-07, -2.21245891e-03,  4.16319202e+00, -2.61201747e+03]
+    polyco2 = [ 3.03495678e-07, -1.71295381e-03,  3.22327145e+00, -2.02202272e+03]
     co2Model = np.poly1d([x*scale for x in polyco2])
     return co2Model
 
