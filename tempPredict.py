@@ -152,10 +152,11 @@ def rms(x):
     return np.std(x)
 
 def getCO2model(scale=1):
-    # For years between 1880 and Nov 2020, returns a value  between zero and scale.  
-    # The shape is based on the log of CO2 concentrations
+    # For years between 1880 and Nov 2020, returns a value  between 0.09*scale and scale.  
+    # The polynomial is a fit to the temperature data, but the model returns predictions
+    # very close to the log of co2 contributions when similarly scaled.
     # This model allows the co2 compensation prediction to extend into the future
-    polyco2 = [ 3.73473114e-07, -2.12676942e-03,  4.03870559e+00, -2.55744899e+03]
+    polyco2 = [ 3.91996394e-07, -2.21245891e-03,  4.16319202e+00, -2.61201747e+03]
     co2Model = np.poly1d([x*scale for x in polyco2])
     return co2Model
 

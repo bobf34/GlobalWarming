@@ -14,7 +14,7 @@ def getTempSunspotData(useLocal = True, plotData=False, temp_filename = 'globalT
     else:
         url = 'https://www.sidc.be/silso/INFO/snmtotcsv.php'
         logging.debug('Gathering sunspot data from '+url+' ...')
-        df_ss=pd.read_csv(url, encoding="ISO-8859-1",header=None, delimiter='\;')
+        df_ss=pd.read_csv(url, encoding="ISO-8859-1",header=None, delimiter='\;', engine='python')
         df_ss.drop(columns=[0,1,4,5,6],inplace=True)
         df_ss.rename(columns={df_ss.columns[0]: 'Year',df_ss.columns[1]:'Sunspots'}, inplace=True)
         logging.debug('Saving datat to: '+ss_filename)
