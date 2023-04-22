@@ -72,7 +72,7 @@ parms = {'modelName':'4a: : Best Model for Future Prediction without CO2','fname
 
 #>>>>>>>>>  Model 4 with CO2:  <<<<<<<<<<<<<
 parms = {'modelName':'4b: Winner: Best Model for Future Prediction with CO2','fname':'bestFuturePredict.csv',
-         'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 
+         'modType':'RECT2','rectW':99, 'rectW2':12, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':8, 'co2comp':-1}  
 
 #Improved Model 3, replaces 11 year moving average with notch filter, no 42-year comp
@@ -112,7 +112,9 @@ parms = {'modelName':'10: Winner -- Overall Best Model','fname':'bestOverallMode
          'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':True, 'co2comp':0.26}  
 
+
 saveResults = False  #If true and fname is defined in parms, the output results are saved into a CSV file
+showSpectrums = False  #Create a separate plot window showing temperature and sunspot spectrums. Default False
 
 showExtra='error'  # 'model' plots the model over the sunspot data used for the first prediction in 1880
                    # 'error' plots the error over the prediction
@@ -404,6 +406,58 @@ def saveResultsCSV(df_temp,df_tempMA,df_model_comb,df_err,fname):
     df_output = df_output[['YrMo','Year','Temperature','TempMovAvg','PredictedTemp','modelPredict','co2predict','error']]
     df_output.to_csv(fname,index=False)
 
+def plotSpectrums(x_ss, df_temp,df_model_comb,bw=0.15,window='boxcar'):
+    fftSize = 8192*4;  #make fft longer than data to allow better frequency bin resolution (doesn't improve RBW)
+    f = np.arange(fftSize)*12/fftSize
+
+    #compute window function
+    #Note:  The boxcar, or uniform window provides the best frequency resolution and the worst amplitude accuracy
+    if not window in ['boxcar','hann','hamming','cosine','flattop']:
+        window='boxcar'
+    w_ss = signal.windows.get_window(window,len(x_ss))
+    w_temp = signal.windows.get_window(window,len(df_temp))
+    w_model = signal.windows.get_window(window,len(df_model_comb))
+    #scale the window for window correction factor, and for the upcoming FFT
+    w_ss *= len(w_ss)/np.sum(w_ss) * 2/fftSize
+    w_temp *= len(w_temp)/np.sum(w_temp) * 2/fftSize
+    w_model *= len(w_model)/np.sum(w_model) * 2/fftSize
+
+    #apply the window and zero pad out to the FFT size
+    ss = np.pad(w_ss*x_ss,(0,fftSize-len(x_ss)))
+    temp = np.pad(w_temp*df_temp.Temperature.values,(0,fftSize-len(df_temp.Temperature.values)))
+    model = np.pad(w_model*df_model_comb.Temperature.values,(0,fftSize-len(df_model_comb.Temperature.values)))
+
+    #compute the spectrums
+    Xfss = fft(ss)
+    Xftemp = fft(temp)
+    Xftemp_m = fft(model)
+
+    #plot the temperature spectrums
+    fig = plt.figure(figsize=(8, 6))
+    fig.subplots_adjust(top=0.95,right=.9,left=.09,wspace=.5,hspace = .5)
+    gs = fig.add_gridspec(2, 1)
+    ax_spec = fig.add_subplot(gs[0, 0])
+    ax_spec.set_title('Temperature Spectrums')
+    ax_spec.plot(f,20*np.log10(np.abs(Xftemp_m)),label='Model Temp',color='b',dashes=(4,1)) #spectrum
+    ax_spec.plot(f,20*np.log10(np.abs(Xftemp)),label='Temp',color='r') #spectrum
+    ax_spec.grid()
+    ax_spec.legend()
+    ax_spec.set_ylabel('dB')
+    ax_spec.set_xlabel('Frequency (1/Year)')
+    ax_spec.set_xlim(0,bw)
+    ax_spec.set_ylim(-75,-25)
+
+    #plot the sunspot spectrum
+    ax_spec1 = fig.add_subplot(gs[1, 0])
+    ax_spec1.set_title('Sunspot Spectrum')
+    ax_spec1.plot(f,20*np.log10(np.abs(Xfss)),label='Sunspot',color='m') #spectrum
+    ax_spec1.grid()
+    ax_spec1.set_ylabel('dB')
+    ax_spec1.set_xlabel('Frequency (1/Year)')
+    ax_spec1.set_xlim(0,bw)
+    ax_spec1.set_ylim(-30,20)
+
+
 ############  BEGIN MAIN PROGRAM ####################
 
 # Get the temperature and sunspot datasets
@@ -474,10 +528,13 @@ else: # Search for the co2 compensation which produces the lowest RMS error
 if saveResults and parms['fname']:
     saveResultsCSV(df_temp,df_tempMA,df_model_comb,df_err,fname=parms['fname'])
 
+if showSpectrums:
+    plotSpectrums(x_ss, df_temp,df_model_comb)
+
 ###### PLOT THE RESULTs #####
 #fig = plt.figure(figsize=(10, 6), constrained_layout=True)
 fig = plt.figure(figsize=(10, 6))
-fig.subplots_adjust(top=0.88,right=.95,left=.09,wspace=.5,hspace = .5)
+fig.subplots_adjust(top=0.88,right=.9,left=.09,wspace=.5,hspace = .5)
 if showParms and showModelName and parms['modelName']:
     fig.suptitle(parms['modelName']+': '+str(parms))
 elif showParms and parms['modelName']:
