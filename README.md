@@ -15,6 +15,8 @@ Image (png) files showing predictions for a few of the models have been uploaded
 
 ### Selecting Plots
 A variable called *showExtra* can be configured to show the model, or the prediction error.
+<br>
+Set variable *showSpectrums* to True for plots of the temperature and sunspot spectrums.
 
 ### Required Datasets
 The first time you run the program it will automatically download the two required datasets.
