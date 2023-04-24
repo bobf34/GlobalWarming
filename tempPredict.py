@@ -289,8 +289,8 @@ def fitSunspotModelToTemp(df_temp,df_tempMA,df_model,co2comp,firstValidYear,spli
             tma is the Moving averaged Temperature
             gm is gain and c is a constant offset
       
-    In matrix form the error = [tma-co2] - [gm c][model 1]
-                             or TMA - AX where A= [gm c]
+    In matrix form the error = [tma'] - [model' 1][gm c]'
+                             or TMA - AX where X= [gm c]'
     
     The fit will be over the years of: greater of firstValid and the first year in the moving average
     through the last year in the moving average temperature.  
@@ -327,8 +327,8 @@ def fitBothModelsToTemp(df_temp,df_tempMA,df_model,firstValidYear,splitYear):
             tma is the Moving averaged Temperature
             gm and gc are gains and c is a constant offset
       
-    In matrix form the error = [tma'] - [gm gc c][model' co2' 1]
-                             or TMA - AX where A= [gm gc c]
+    In matrix form the error = [tma'] - [model' co2' 1][gm gc c]'
+                             or TMA - AX where X= [gm gc c]'
     
     The fit will be over the years of: greater of firstValid and the first year in the moving average
     through the last year in the moving average temperature.  
