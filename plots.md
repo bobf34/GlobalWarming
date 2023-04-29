@@ -1,18 +1,21 @@
-### The Hybrid Model
-This black-box hybrid model predicts temperature by optimally scaling the contributions of a CO2 model and a sunspot model 
+### A Hybrid Model for Predicting Global Temperature
+This black-box hybrid model predicts temperature by optimally scaling the contributions of a CO2 model, and a sunspot model, 
 to minimize temperature prediction error.  As the model can't predict volcanos and climate oscillations (e.g. El Niño-La Niña)
 the temperature will fluctuate around the prediction.
 ![Plot](./TempPrediction.png)
 
 ## The CO2 Model
-The CO2 model is a simple 3rd-order polynomial that approximates the log of atmospheric CO2 concentrations.  As the model is monotonic and lacking in features,
-the model only predicts the overall upward trend. Long periods of cooling are not predicted.  This plot shows the temperature prediction using only the CO2 model.
+The CO2 model is a simple 3rd-order polynomial that closely approximates the log of atmospheric CO2 concentrations.  As the model is monotonic and 
+lacking in features, the model only predicts the overall upward trend. Long periods of cooling are not predicted.  This plot shows the 
+temperature prediction using only the CO2 model.
 
 ![Plot](./TempPredictionCO2only.png)
 
 ## The Sunspot Model
+Sunspots don't significantly affect earth's climate. They are a proxy for solar activity.  When the sun is more active, there are more sunspots.
+
 The sunspot model contains three components:
-*  A 98-99 Year Moving Average
+*  A 99-Year Moving Average
 *  A filter for attenuating the 11-year sunspot cycle energy (either a notch filter, or a short moving average)
 *  A method for attenuating energy in the 42-year sunspot cycle.
 
