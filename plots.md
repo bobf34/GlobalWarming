@@ -16,12 +16,12 @@ The sunspot model contains three components:
 *  A filter for attenuating the 11-year sunspot energy (notch filter or short moving average)
 *  A method for attenuating energy in the 42-year sunspot cycle.
 
-This plot shows the temperature prediction using only the complete sunspot model (using a notch filter)
+This plot shows the temperature prediction using only the sunspot model (with notch filter and 42-year cycle attenuation)
 
 ![Plot](./TempPredictionSSOnly.png)
 
-The 99-Year Moving average provides most of the information in the prediction. The moving average model is shown positioned over the sunspot
-data used for the first 1880 temperature prediction.
+The 99-Year Moving average supplies most of the information in the prediction. The moving average model is shown positioned over the sunspot
+data used for the first 1880 temperature prediction.  The earliest predictions use sunspot data from the late 1700's to predict the earliest global temperatures, which may explain the less accurate results prior to 1895.
 
 ![Plot](./Simple99yearMovingAverageModel.png)
 
