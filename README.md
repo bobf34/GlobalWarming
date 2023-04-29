@@ -22,9 +22,9 @@ Set variable *showSpectrums* to True for plots of the temperature and sunspot sp
 The first time you run the program it will automatically download the two required datasets.
 
 ### Brief Model Description
-[Description of Model and Plots](plots.md)
+[Brief Model Description](plots.md)
 ### Detailed Model Description and Validation
-[Model description and validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
+[Full Model Description and Validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
 
 ### Data Credits
 Sunspot Data: WDC-SILSO, [Royal Observatory of Belgium, Brussels](https://www.sidc.be/silso/datafiles)
