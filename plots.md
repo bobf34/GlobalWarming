@@ -24,15 +24,15 @@ This plot shows the temperature prediction using only the sunspot model (with th
 ![Plot](./TempPredictionSSOnly.png)
 
 The 99-Year Moving average supplies most of the information in the prediction. The moving average model is shown positioned over the sunspot
-data averaged to produce the first 1880 temperature prediction.  The earliest predictions use sunspot data from the late 1700's to predict the earliest global temperatures, which may explain the less accurate results prior to 1895.
+data averaged to produce the first 1880 temperature prediction.  The model is slid to the right to produce the remainder of the predictions  The earliest predictions use sunspot data from the late 1700's to predict the earliest global temperatures, which may explain the less accurate results prior to 1895.
 
 ![Plot](./Simple99yearMovingAverageModel.png)
 
 The 99-Year moving average does not sufficiently attenuate the 11-year cycle, hence the 11-year ripples.  Here's the model with both a 
-99-year moving average, and an 11-year moving average.  The 11-year moving average works well, but provides a bit too much smoothing.  The notch-filter alternative used in the sunspot-only prediction above provides more detailed prediction, but eliminates the ability to predict into the future.
+99-year moving average, and an 11-year moving average.  The 11-year moving average works well, but provides a bit too much smoothing.  The notch-filter alternative used in the sunspot-only prediction above produces a more detailed prediction, but eliminates the ability to predict into the future.
 
 ![Plot](./99year11yearMovingAverageModel.png)
 
-Attenuating the 42-year cycle improves the accuracy on either side of 1980, sharpens the prediction around the 1940 anomaly, and changes the trajectory of the prediction beyond 2023
+Attenuating the 42-year cycle: improves the accuracy on either side of 1980; sharpens the prediction around the 1940 anomaly and changes the trajectory of the prediction beyond 2023
 
 ![Plot](./99-11-42Model.png)
