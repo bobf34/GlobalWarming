@@ -13,10 +13,10 @@ the model only predicts the overall upward trend. Long periods of cooling are no
 ## The Sunspot Model
 The sunspot model contains three components:
 *  A 98-99 Year Moving Average
-*  A filter for attenuating the 11-year sunspot energy (notch filter or short moving average)
+*  A filter for attenuating the 11-year sunspot cycle energy (either a notch filter, or a short moving average)
 *  A method for attenuating energy in the 42-year sunspot cycle.
 
-This plot shows the temperature prediction using only the sunspot model (with notch filter and 42-year cycle attenuation)
+This plot shows the temperature prediction using only the sunspot model (with the notch filter and 42-year cycle attenuation)
 
 ![Plot](./TempPredictionSSOnly.png)
 
@@ -25,8 +25,8 @@ data averaged to produce the first 1880 temperature prediction.  The earliest pr
 
 ![Plot](./Simple99yearMovingAverageModel.png)
 
-The 99-Year moving average does not sufficiently attenuate the 11-year cycle.  Here's the model with both a 99-year moving average, 
-and an 11-year moving average.
+The 99-Year moving average does not sufficiently attenuate the 11-year cycle, hence the 11-year ripples.  Here's the model with both a 
+99-year moving average, and an 11-year moving average.  The 11-year moving average works well, but provides a bit too much smoothing.  The notch-filter alternative used in the sunspot-only prediction above provides more detailed prediction, but eliminates the ability to predict into the future.
 
 ![Plot](./99year11yearMovingAverageModel.png)
 
