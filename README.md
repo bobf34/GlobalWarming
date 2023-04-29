@@ -21,6 +21,8 @@ Set variable *showSpectrums* to True for plots of the temperature and sunspot sp
 ### Required Datasets
 The first time you run the program it will automatically download the two required datasets.
 
+__WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.
+
 ### Brief Model Description
 [Brief Model Description](plots.md)
 ### Detailed Model Description and Validation
