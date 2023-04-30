@@ -3,6 +3,12 @@ A simple, but surprisingly accurate model for predicting global temperatures usi
 
 ![Plot](./TempPrediction.png)
 
+### Brief Model Description
+[Brief Model Description](plots.md)
+
+### Detailed Model Description and Validation
+[Full Model Description and Validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
+
 ### To Run
 Download both py files
 <br>
@@ -23,13 +29,7 @@ The first time you run the program it will automatically download the two requir
 
 __WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.
 
-### Brief Model Description
-[Brief Model Description](plots.md)
-### Detailed Model Description and Validation
-[Full Model Description and Validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
-
 ### Data Credits
 Sunspot Data: WDC-SILSO, [Royal Observatory of Belgium, Brussels](https://www.sidc.be/silso/datafiles)
 <br>
 Global Temperature Anomaly Data: [NOAA]( https://www.ncei.noaa.gov/access/monitoring/global-temperature-anomalies/anomalies)
-
