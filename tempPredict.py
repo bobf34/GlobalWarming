@@ -10,13 +10,19 @@ from getTempSunspotData import getTempSunspotData
 #parameters which control the design of the 11-year notch
 #fc = center frequency, bw = bandwidth, g controls depth of notch. Attenuation decreases as g increases min =1
 f11parms1 = {'fc':.0933,'bw':.061,'g':1.05}  #lowest RMS error and greatest suppression of the eleven year cycle
-f11parms2 = {'fc':.0933,'bw':.061,'g':1.55}   #lowest RMS error for data beyond 2000 (more accurate satellite temps)
+f11parms2 = {'fc':.0933,'bw':.061,'g':1.55}   #lowest RMS error for data beyond splitYear (more accurate satellite temps)
 f11parms3 = {'fc':.0933,'bw':.061,'g':1.3}   #compromise 
 
 #parameters affecting 42-year cycle suppression
 #fc = center frequency, g controls amount of suppression. Suppression increases with G, max = 1
 f42parms1 = {'fc':[0.024169921875],'g':[0.69]}
 
+firstValidYear = 1895 # Ignore the data before 1895 when fitting and computing error, 
+                      # The earliest global temperature and/or sunspot data may be not be that accurate.
+splitYear = 1997      # New satellites with better temperature sensors started launchng in 1998 (NOAA-15) which might
+                      # explain the sudden change in the variance of the error.  On the error plot, the RMS error
+                      # is computed both before and after splitYear.  When a weighted LMS fit is used, the statistics
+                      # of the error before and after this date are used to weight the fit.
 '''
 parms = {
         'modelName':'MyModel', #Appears on plots
@@ -30,7 +36,7 @@ parms = {
         'f42parms': f42parms1  #parameters which control the 42-year cycle suppression
         'f11parms': f11parms1, #parameters which control the design of the 11-year notch filter
         'weightedFit':False  #Optional override of global variable. See variable for description
-        'useRMSweight':True  #Optional override of global variable. See variable for description
+        'extraWeight':1  #Optional raises weight by power of extraWeight
         'advance':15,  #amount in yearss to forward shift model output (i.e. years of prediction beyond sunspot data
         'co2comp':-1,  #amount of co2 compensation degC  set negative for automatic selection
         }
@@ -44,75 +50,80 @@ About the model types
    energy at the frequency of the 11-year sunspot cycle, which is also the purpose of RECT2 when set to l1 years. The notch 
    just accomplishes this with a bit more finesse.
 
-#CO2 only model
+   NOTE:  The RMS errors shown below may not match your results as the sunspot and global temperature datasets are modified and updated
+
+#CO2 only model. 
+#RMS error: 0.0924
 parms = {'modelName':'1: CO2 Only Model','fname':'', 'modType':'NONE',
          'rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':0, 'co2comp':-1}  
 
-#BASIC MODEL 99-year moving average predicts 13 years into future
+#BASIC MODEL 99-year moving average predicts 13 years into future. 
+#RMS error: 0.0984
 parms = {'modelName':'2: Basic: 99-Year Moving Average Model', 'fname':'',
          'modType':'RECT','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':13, 'co2comp':0}  
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':13.5, 'co2comp':0}  
 
-#Improved Model 2, adds 11-year moving average predicts 8 years into future
+#Improved Model 2, adds 11-year moving average predicts 9.5 years into future. 
+#RMS error: 0.0761
 parms = {'modelName':'3a: Model 99-11','fname':'',
-         'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':8, 'co2comp':0}  
+         'modType':'RECT2','rectW':99, 'rectW2':11, 'MA':3, 'M42':False, 
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':9.5, 'co2comp':0}  
 
-#Same as 3a except slightly shorter rectW2, predicts 10 year.  Allows more 11-year energy in prediction
-parms = {'modelName':'3b Model 99-9','fname':'',
-         'modType':'RECT2','rectW':99, 'rectW2':9, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10, 'co2comp':0}  
+#Same as 3a except slightly shorter rectW and rectW2, predicts 10.5 years into future.  Allows more 11-year energy in prediction. 
+#RMS error: 0.0767
+parms = {'modelName':'3b Model 98-9','fname':'',
+         'modType':'RECT2','rectW':98, 'rectW2':10, 'MA':3, 'M42':False, 
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10.5, 'co2comp':0}  
 
-
-# Improved Model 3a:  Best for future prediction Adds compensation for 42
+# Improved Model 3a:  Best for future prediction Adds compensation for 42. 
+#RMS error: 0.0651
 parms = {'modelName':'4a: : Best Model for Future Prediction without CO2','fname':'bestFuturePredict.csv',
-         'modType':'RECT2','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':8, 'co2comp':0}  
+         'modType':'RECT2','rectW':98, 'rectW2':10, 'MA':3, 'M42':True, 
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10.5, 'co2comp':0}  
 
-#>>>>>>>>>  Model 4 with CO2:  <<<<<<<<<<<<<
+#>>>>>>>>>  Model 4 with CO2:  <<<<<<<<<<<<<. 
+#RMS error: 0.0621
 parms = {'modelName':'4b: Winner: Best Model for Future Prediction with CO2','fname':'bestFuturePredict.csv',
-         'modType':'RECT2','rectW':99, 'rectW2':12, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':8, 'co2comp':-1}  
+         'modType':'RECT2','rectW':98, 'rectW2':10, 'MA':3, 'M42':True, 
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10.5, 'co2comp':-1}  
 
-#Improved Model 3, replaces 11 year moving average with notch filter, no 42-year comp
-parms = {'modelName':'5: Improved Model 3: 99-N','fname':'',
-         'modType':'NOTCH','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'co2comp':0.0}  
+#Improved Model 3, replaces short moving average with notch filter, no 42-year comp. 
+#RMS error: 0.0797
+parms = {'modelName':'5: Improved Model 3: 98-N','fname':'',
+         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':False, 
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.5, 'co2comp':0.0}  
 
-#>>>>>>>>>>>  Model with best post balanced 2000 RMS error No CO2 compensation <<<<<<<<<<<<<<<<<
-parms = {'modelName':'6: Best Sunspot-Only Lowest error after 2000','fname':'bestSunspotOnly.csv',
-         'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':True, 'co2comp':0.0}  
+#>>>>>>>>>>>  Model with best post balanced splitYear RMS error No CO2 compensation <<<<<<<<<<<<<<<<<. 
+#RMS error: 0.0694
+parms = {'modelName':'6: Best Sunspot-Only Lower error after '+str(splitYear),'fname':'bestSunspotOnly.csv',
+         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.3, 'weightedFit':True, 'extraWeight':3, 'co2comp':0.0}  
 
-# Interesting Overfit of post 2000 data.  Wrongly follows 1991 Pinatubo erruption recovery
-parms = {'modelName':'7: Sunspot-Only Lowest error after 2000 (Overfit) ','fname':'bestSunspotOnly.csv',
-         'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':False, 'co2comp':0.0}  
+#>>>>>>>>>>>>  Model with lowest overall RMS error, less accruate post splitYear  <<<<<<<<<<<<<<<<<<<. 
+#RMS error: 0.0641  CO2 comp: 0.194
+parms = {'modelName':'7: Winner -- Model with Lowest RMS error','fname':'LowestRmsModel.csv',
+         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
+         'f42parms':f42parms1, 'f11parms':f11parms1, 'advance':1.2, 'co2comp':-1}  
 
-#>>>>>>>>>>>>  Model with lowest overall RMS error, less accruate post 2000  <<<<<<<<<<<<<<<<<<<
-parms = {'modelName':'8: Winner -- Model with Lowest RMS error','fname':'LowestRmsModel.csv',
-         'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms1, 'weightedFit':False, 'advance':0, 'co2comp':-1}  
+#  Search demo uses f11parms3 compromise notch filter settings. 
+#RMS error: 0.0647  CO2 comp:0.28
+parms = {'modelName':'8: Search for CO2','fname':'co2Search.csv',
+         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 'optimalCO2': False,
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':1.4, 'co2comp':-1}  
 
-#  Search demo uses f11parms3 compromise notch filter settings
-parms = {'modelName':'9: Search for CO2','fname':'LowestRmsModel.csv',
-         'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 'optimalCO2': False,
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'weightedFit':True, 'advance':0, 'co2comp':-1}  
-
-#>>>>>>>>>>> Best Overall Model. Balances overall RMS error with post 2000 error <<<<<<<<<<<<<<<<<
-parms = {'modelName':'10: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
-         'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':True, 'co2comp':0.28}  
+#>>>>>>>>>>> Best Overall Model. Balances overall RMS error with post splitYear accuracy <<<<<<<<<<<<<<<<<. 
+#RMS error: 0.0663 CO2 comp:0.246
+parms = {'modelName':'9: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
+         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.4, 'weightedFit':True, 'extraWeight':4, 'co2comp':-1}  
 '''
 #Active Model Copy from comment lock above and place below
+parms = {'modelName':'9: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
+         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.4, 'weightedFit':True, 'extraWeight':4, 'co2comp':-1}  
 
-#>>>>>>>>>>> Best Overall Model. Balances overall RMS error with post 2000 error <<<<<<<<<<<<<<<<<
-parms = {'modelName':'10: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
-         'modType':'NOTCH','rectW':98.8, 'rectW2':11.1, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'weightedFit':True, 'useRMSweight':True, 'co2comp':0.26}  
-
-
+# NOTE:  firstValidYear and splitYear are defined before the models
 saveResults = False  #If true and fname is defined in parms, the output results are saved into a CSV file
 showSpectrums = False  #Create a separate plot window showing temperature and sunspot spectrums. Default False
 
@@ -126,22 +137,17 @@ optimalCO2 = True     # If True and co2comp is negative, simultaneously fit suns
                       # the CO2 level, fit the sunspot prediction, identify the CO2 level producing the minimum error and plot.
                       # Note: The CO2 and RMS results may vary slightly with this setting.
 
-firstValidYear = 1895 # Ignore the data before 1895 when fitting and computing error, 
-                      # The earliest global temperature and/or sunspot data may be not be that accurate.
-splitYear = 2000      # New satellites with better temperature sensors were launched around 2000 which might
-                      # explain the sudden change in the variance of the error.  On the error plot, the RMS error
-                      # is computed both before and after splitYear.  When a weighted LMS fit is used, the statistics
-                      # of the error before and after this date are used to weight the fit.
 weightedFit = False   # Perform a weighted LMS fit (only if sklearn is installed)  Default: False
-useRMSweight = True   # If False, use variance to weight the fit. Default True  Warning: Variance tends to overfit 
+extraWeight = 1       # 0.5 for weighting of 1/stdDev, 1.0 for weighting of 1/variance  2 for pow(1/var,2), etc
+                      # The larger the number, the more heavily weighted the fit is post splitYear
 
 #Allow these globals to be overridden in parms dictionary
 if 'optimalCO2' in parms:
    optimalCO2 = parms['optimalCO2']
 if 'weightedFit' in parms:
    weightedFit = parms['weightedFit']
-if 'useRMSweight' in parms:
-   useRMSweight = parms['useRMSweight']
+if 'extraWeight' in parms:
+   extraWeight = parms['extraWeight']
 
 
 ###################################################################################################
@@ -170,7 +176,7 @@ def elevenYrNotch(f11parms = {'fc':.0933,'bw':.061,'g':1.3}):
     # Improves accuracy over 11-year moving average
     fc = f11parms['fc']
     bw = f11parms['bw']
-    g =  f11parms['g']  #useful range 1.05 (less detail, lower RMS error) to ~1.55 (better match beyond year 2000)
+    g =  f11parms['g']  #useful range 1.05 (less detail, lower RMS error) to ~1.55 (better match beyond year splitYear)
     ln=27 #27 years is the longest possible filter without loosing the ability to predict to the end of the sunspot data
 
 
@@ -265,16 +271,13 @@ def getWeightedFit(err,year,splitYear,X,y):
     #compute index variables based on splitYear
     region1 = np.where(year<splitYear)
     region2 = np.where(year>=splitYear)
-   
-    #select between weighting based on the RMS, or the variance
-    fcn = rms  # np.var overfits
-    if not useRMSweight:  #warning overfits
-       fcn = np.var
-      
+
     #construct a weighting vector
-    w1 = fcn(err[np.where(year<splitYear)]) #use of variance overfits
-    w2 = fcn(err[np.where(year>=splitYear)])
-    wghts = np.concatenate((w1* np.ones(len(region1[0])),2* np.ones(len(region2[0]))))
+    w1 = 1/np.var(err[np.where(year<splitYear)]) #use of variance overfits
+    w2 = 1/np.var(err[np.where(year>=splitYear)])
+    w1 =pow(w1,extraWeight)
+    w2 =pow(w2,extraWeight)
+    wghts = np.concatenate((w1* np.ones(len(region1[0])),w2* np.ones(len(region2[0]))))
    
     #perform the fit and compute the error
     reg = LinearRegression().fit(X, y,wghts)
@@ -488,10 +491,8 @@ model = getModel(parms)
 # Use the model to predict the temperature.  Convolve the model with the sunspot data
 model_predict = np.convolve(x_ss,model,mode='valid')
 
-advance =  parms['advance']  #convenience variable
-
 #truncate the data prior to the first year in df_temp
-model_predict = model_predict[-(len(df_temp)+12*advance):]
+model_predict = model_predict[-(len(df_temp)+int(12*parms['advance'])):]
 
 #create a time index
 t_model = np.arange(len(model_predict))/12+df_temp.Year[0]
