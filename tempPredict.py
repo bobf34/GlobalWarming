@@ -53,7 +53,7 @@ About the model types
    NOTE:  The RMS errors shown below may not match your results as the sunspot and global temperature datasets are modified and updated
 
 #CO2 only model. 
-#RMS error: 0.0924
+#RMS error: 0.0924   CO2 comp: 1.121
 parms = {'modelName':'1: CO2 Only Model','fname':'', 'modType':'NONE',
          'rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':0, 'co2comp':-1}  
@@ -101,19 +101,19 @@ parms = {'modelName':'6: Best Sunspot-Only Lower error after '+str(splitYear),'f
          'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.3, 'weightedFit':True, 'extraWeight':3, 'co2comp':0.0}  
 
 #>>>>>>>>>>>>  Model with lowest overall RMS error, less accruate post splitYear  <<<<<<<<<<<<<<<<<<<. 
-#RMS error: 0.0641  CO2 comp: 0.194
+#RMS error: 0.0638  CO2 comp: 0.162
 parms = {'modelName':'7: Winner -- Model with Lowest RMS error','fname':'LowestRmsModel.csv',
          'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms1, 'advance':1.2, 'co2comp':-1}  
 
 #  Search demo uses f11parms3 compromise notch filter settings. 
-#RMS error: 0.0647  CO2 comp:0.28
+#RMS error: 0.0644  CO2 comp:0.24
 parms = {'modelName':'8: Search for CO2','fname':'co2Search.csv',
          'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 'optimalCO2': False,
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':1.4, 'co2comp':-1}  
 
 #>>>>>>>>>>> Best Overall Model. Balances overall RMS error with post splitYear accuracy <<<<<<<<<<<<<<<<<. 
-#RMS error: 0.0663 CO2 comp:0.246
+#RMS error: 0.0663 CO2 comp:0.213
 parms = {'modelName':'9: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
          'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.4, 'weightedFit':True, 'extraWeight':4, 'co2comp':-1}  
@@ -164,7 +164,8 @@ def getCO2model(scale=1):
     # The polynomial is a fit to the temperature data, but the model returns predictions
     # very close to the log of co2 contributions.
     # This model allows the co2 compensation prediction to extend into the future
-    polyco2 = [ 3.03495678e-07, -1.71295381e-03,  3.22327145e+00, -2.02202272e+03]
+    #polyco2 = [ 3.03495678e-07, -1.71295381e-03,  3.22327145e+00, -2.02202272e+03] # .09 - 1 degC from 1880- Nov 2020
+    polyco2 = [ 3.51809168e-07, -1.98563900e-03,  3.73638417e+00, -2.34401630e+03]  # 0 - 1.1 degC from 1880-Feb 2023
     co2Model = np.poly1d([x*scale for x in polyco2])
     return co2Model
 
