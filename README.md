@@ -10,9 +10,11 @@ A simple, but surprisingly accurate model for predicting global temperatures usi
 [Full Model Description and Validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
 
 ### To Run
-Download both py files
+Download getTempSunspotData.py and tempPredict.py files
 <br>
 Run tempPredict.py
+<br>
+
 
 ### Changing the model
 There are several different preconfigured models in a comment block.  Copy the desired model *parms* dictionary and replace (or place below) the parms dictionary located just below the comment block.  You can also create your own model by adjusting the parameters of an existing model.
@@ -29,7 +31,12 @@ The first time you run the program it will automatically download the two requir
 
 __WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.
 
+### Misc
+Use synoptic.py to download solar magnetic field data and assemble into a csv dataset.  Data is plotted when run as a stand-long program.
+
 ### Data Credits
 Sunspot Data: WDC-SILSO, [Royal Observatory of Belgium, Brussels](https://www.sidc.be/silso/datafiles)
 <br>
 Global Temperature Anomaly Data: [NOAA]( https://www.ncei.noaa.gov/access/monitoring/global-temperature-anomalies/anomalies)
+<br>
+Wilcox Solar Observatory Synoptic Charts and Data [WSO](http://wso.stanford.edu/synopticl.html)
