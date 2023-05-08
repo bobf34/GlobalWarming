@@ -32,7 +32,7 @@ The first time you run the program it will automatically download the two requir
 __WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.
 
 ### Misc
-Use synoptic.py to download solar magnetic field data and assemble into a csv dataset.  Data is plotted when run as a stand-long program.
+Use getSynopticData.py to download solar magnetic field data and assemble into a csv dataset.  Data is plotted when run as a stand-long program.
 
 ### Data Credits
 Sunspot Data: WDC-SILSO, [Royal Observatory of Belgium, Brussels](https://www.sidc.be/silso/datafiles)
