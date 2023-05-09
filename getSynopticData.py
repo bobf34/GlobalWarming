@@ -96,7 +96,10 @@ if __name__ == "__main__":
     start= 1642 # 1976:05:27 1976.402464066
     end = 2258 # 2022:05:28
     cycle = 'CT2258' #'CT2130'
-    plotSynoptic = True
+    showSynoptic = True
+    showButterfly = True
+    showMagFields = True
+    
     
     df = getSynopticData(useLocal = True, start=start, end=end, filename='synoptic.csv')
     dCols = list(df)[3:]
@@ -106,19 +109,20 @@ if __name__ == "__main__":
     if cycle not in cycles:
         cycle = cycles[0]
     
-    # format data for contour plot
-    cycleDate = int(1000*df[(df["Cycle"]==cycle) & (df["Longitude"]==180)].Year.values[0])/1000
-    df_new = df[df['Cycle'] == cycle]
-    longs = df_new.Longitude.values
-    Z =  df_new[dCols].values.T
-    #levels = np.linspace(Z.min(), Z.max(), 7)
-    levels = [-2000,-1000,-500,-100,0,100,500,1000,2000]  #matches Wilcox Solar Observator synoptic charts
     lats = [int((-14.5/15 + i/15)*180/np.pi) for i in range(30)]
-    lats.reverse()
 
-    if plotSynoptic:
+    if showSynoptic:  #for a single Carrington Rotation
+        # format data for contour plot
+       cycleDate = int(1000*df[(df["Cycle"]==cycle) & (df["Longitude"]==180)].Year.values[0])/1000
+       df_new = df[df['Cycle'] == cycle]
+       longs = df_new.Longitude.values
+       Z =  df_new[dCols].values.T
+       #levels = np.linspace(Z.min(), Z.max(), 7)
+       levels = [-2000,-1000,-500,-100,0,100,500,1000,2000]  #matches Wilcox Solar Observator synoptic charts
+       lats.reverse()
+
        #plt.style.use('_mpl-gallery-nogrid')
-       fig, ax = plt.subplots()
+       fig, ax = plt.subplots(figsize=(8, 6))
 
        ax.contourf(longs, lats, Z, levels=levels,cmap=mpl.colormaps['Blues'].reversed())
        ax.contour(longs, lats, Z,levels=levels,colors='k',linewidths=0.5,negative_linestyles='dashed')
@@ -131,33 +135,21 @@ if __name__ == "__main__":
        ax.set_yticks([-60+i*30 for i in range(5)],minor=False)
        #ax.set_yticks([-55, 55, 55], minor=True)
        ax.grid()
-
-    #plot the time series for eachc latitude in a separate graph
-    df.plot(x='Year',y=dCols, ylabel='microTesla',title="Solar Magnetic Field")
-
-    if False:
+    
+    if showButterfly:
        df2 = df.copy()
-       southCols = ['m1', 'm5', 'm9', 'm13', 'm17', 'm21', 'm24', 'm28', 'm32', 'm36', 'm40', 'm43', 'm47', 'm51', 'm55']
-       for col in southCols:
-           df2[col] *= -1
-       csum = None
-       for col in dCols:
-           #df2[col] = np.convolve(df2[col],np.ones(1*int(yr/cr)),mode='same')
-           if csum is None:
-               csum = df2[col]
-           else:
-               csum += df2[col]
-   
-    #df2.plot(x='Year',y=dCols, ylabel='microTesla',title="Solar Magnetic Field")
-       L = int(11*72*yr/cr)
-       w = np.ones(L)/L
-       L_2 = int(L/2)
-       m = -np.convolve(np.abs(csum),w,mode='valid')
-       year = df.Year.values[L_2:-L_2]
-       year= df.Year.values[L-1:]+3
-       
-       plt.plot(year,m)
-       plt.grid()
-   
+       for lat in dCols:
+           df2[lat] = np.convolve(df2[lat],np.ones(72)/72,mode='same')
+       Z =  df2[dCols].values.T
+       fig2, ax2 = plt.subplots(figsize=(8, 6))
+       ax2.pcolormesh(df.Year, lats, Z, vmin=-500, vmax=500,cmap=mpl.colormaps['seismic'].reversed())
+       ax2.set_title("\"Butterfly Diagram\" -- Longitudinally Averaged Magnetic Field")
+       ax2.set_ylabel("Latitude")
+       ax2.set_xlabel("Year")
+
+    if showMagFields:
+       #plot the time series for eachc latitude in a separate graph
+       df.plot(x='Year',y=dCols, ylabel='microTesla',title="Solar Magnetic Field",figsize=(8, 6))
     plt.show()
+   
 
