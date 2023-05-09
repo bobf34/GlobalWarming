@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from getTempSunspotData import getTempSunspotData
 from getSynopticData import getSynopticData,cr,yr
     
+showSunspots = True
 
 def getDataInFitRegion(df_tempMA,df_pred):
     # returns the overlapping temperature and prediction data
@@ -35,9 +36,33 @@ def fitData(df_tempMA,df_pred):
     fitParms = {'gain':gm, 'offset':c,'rmserr':np.std(err)}
     return fitParms
 
+def plotSunspots(m,df_ss):
+    #plot the field and compare to sunspots
+    L = int(1*72*yr/cr)  #length of moving average (1 year) * longitudes * years/Carrington cycle
+    w = np.ones(L)/L
+
+    # One year MA of sunspots
+    ss = np.convolve(df_ss.Sunspots,np.ones(12)/12,mode='valid')
+    ss_year = df_ss.Year[6:-6+1]
+
+    # One year MA of sums, scale to match sunspots
+    predict = np.convolve(m,w,mode='valid')/15.5 - 5
+    year= df_syn.Year.values[L-1:]-1  #need slight time alignment
+
+    fig, ax = plt.subplots()
+    ax.plot(ss_year,ss,label='Sunspot')
+    ax.plot(year,predict,label='Field')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('SSN')
+    ax.set_xlim(1975,2025)
+    ax.set_title('Magnetic Field vs Sunspot (1yr MA)')
+    ax.legend()
+    ax.grid()
 
 ############  BEGIN MAIN PROGRAM ####################
+
 # Get the temperature data
+
 [df_temp,df_ss] = getTempSunspotData(useLocal = True, plotData=False)
 
 #Create a 3yr moving average of the temperature data for plotting and prediction error purposes
@@ -49,6 +74,7 @@ df_tempMA = pd.DataFrame( {'Year':t_tempMA,'Temperature':tempMA})
 # Get the WSO synoptic data
 df_syn = getSynopticData()
 
+
 #Get the latitude column lables
 lats = list(df_syn)[3:]
 
@@ -58,11 +84,15 @@ df = df_syn[lats].copy()
 df[southLats] *= -1
 
 #For each time, sum over the lower latitudes and compute the absolute value
-ignoreLats = 10  # ignore the N highest and lowest latitudes
+ignoreLats = 9  # ignore the N highest and lowest latitudes
 sumLats = lats[ignoreLats:-ignoreLats]
-m = np.abs(df[sumLats].sum(axis=1))
+m =df[sumLats].sum(axis=1)
+m =np.abs(m)
 
-# apply an 11-year moving average to the sum
+if showSunspots:
+    plotSunspots(m,df_ss)
+
+# apply an 11-year moving average to the sum and negate the result (for temp prediction)
 L = int(11*72*yr/cr)  #length of moving average (11 years) * longitudes * years/Carrington cycle
 w = np.ones(L)/L
 predict = -np.convolve(m,w,mode='valid')
@@ -73,18 +103,20 @@ df_pred =  pd.DataFrame({'Year':year, 'Temperature':predict})
 fitParms = fitData(df_tempMA,df_pred)
 df_pred.Temperature = df_pred.Temperature * fitParms['gain'] + fitParms['offset']
     
-plt.title('Temperature Anomalies ')
-plt.plot(df_temp.Year,df_temp.Temperature,'.8',label='NOAA Global Temp Anomaly')
-plt.plot(df_tempMA.Year,df_tempMA.Temperature,'r')
-plt.plot(df_tempMA.Year,df_tempMA.Temperature,'r',label='Temp 3 Yr Moving Average')
+
+fig, ax = plt.subplots()
+ax.set_title('Temperature Anomalies ')
+ax.plot(df_temp.Year,df_temp.Temperature,'.8',label='NOAA Global Temp Anomaly')
+ax.plot(df_tempMA.Year,df_tempMA.Temperature,'r')
+ax.plot(df_tempMA.Year,df_tempMA.Temperature,'r',label='Temp 3 Yr Moving Average')
 errStr = ': RMS Error:'+'{:.4f}'.format(fitParms['rmserr'])+'°C'
-plt.plot(df_pred.Year,df_pred.Temperature,'b',label='Prediction from Solar Magnetic Field'+errStr)
-plt.ylabel('°C')
-plt.xlabel('Year')
-plt.xlim(1980,2030)
-plt.ylim(0,1.5)
-plt.legend()
-plt.grid()
+ax.plot(df_pred.Year,df_pred.Temperature,'b',label='Prediction from Solar Magnetic Field'+errStr)
+ax.set_ylabel('°C')
+ax.set_xlabel('Year')
+ax.set_xlim(1980,2030)
+ax.set_ylim(0,1.5)
+ax.legend()
+ax.grid()
 
 plt.show()
 
