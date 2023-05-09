@@ -4,7 +4,7 @@ Two simple, but surprisingly accurate models for predicting global temperatures.
 The first model is a hybrid model predicting global temperatures using using sunspots and CO2 concentrations.
 ![Plot](./TempPrediction.png)
 
-The second model predicts global temperatures from solar magnetic fields.
+The second model predicts global temperatures from solar magnetic fields. Note: This model as not yet been validated.
 ![Plot](./SolarMagneticPrediction.png)
 
 ### Brief Model Description
