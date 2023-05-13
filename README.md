@@ -8,7 +8,7 @@ The second model predicts global temperatures from solar magnetic fields. Note: 
 ![Plot](./SolarMagneticPrediction.png)
 
 ### Brief Model Description
-[Brief Sunspot/CO2 Model Description](plots.md)
+[Brief Sunspot/CO2 Model Description](hybridmodel.md)
 
 ### Detailed Model Description and Validation
 [Full Sunspot/CO2 Model Description and Validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
