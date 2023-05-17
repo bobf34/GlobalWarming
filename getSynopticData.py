@@ -51,11 +51,11 @@ def getCycle(cycle):
     df = df.iloc[:-1]
 
     #rename the columns 
-    #lats = (np.arange(30)/15-14.5/15)*180/np.pi
+    lats = [int(np.arcsin(-14.5/15 + i/15)*180/np.pi) for i in range(30)]
     #colNames = ['Cycle','Longitude'] +lats.astype(int).tolist()
     colNames = ['Cycle', 'Number', 'Longitude', 
-                'p55', 'p51', 'p47', 'p43', 'p40', 'p36', 'p32', 'p28', 'p24', 'p21', 'p17', 'p13', 'p9', 'p5', 'p1', 
-                'm1', 'm5', 'm9', 'm13', 'm17', 'm21', 'm24', 'm28', 'm32', 'm36', 'm40', 'm43', 'm47', 'm51', 'm55']
+                'p75', 'p64', 'p56', 'p50', 'p44', 'p39', 'p34', 'p30', 'p25', 'p21', 'p17', 'p13', 'p9', 'p5', 'p1', 
+                'm1', 'm5', 'm9', 'm13', 'm17', 'm21', 'm25', 'm29', 'm34', 'm39', 'm44', 'm50', 'm56', 'm64', 'm75']
     if len(df.columns) != len(colNames):
         pdb.set_trace()
     df.columns = colNames
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     if cycle not in cycles:
         cycle = cycles[0]
     
-    lats = [int((-14.5/15 + i/15)*180/np.pi) for i in range(30)]
+    lats = [int(np.arcsin(-14.5/15 + i/15)*180/np.pi) for i in range(30)]
 
     if showSynoptic:  #for a single Carrington Rotation
         # format data for contour plot
