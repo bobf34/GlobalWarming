@@ -1,7 +1,6 @@
 ### A Hybrid Model for Predicting Global Temperature
-This black-box hybrid model predicts temperature by optimally scaling the contributions of a CO2 model, and a sunspot model, 
-to minimize temperature prediction error.  As the model can't predict volcanos and climate oscillations (e.g. El Niño-La Niña)
-the temperature will fluctuate around the prediction.
+This empirical, or black-box hybrid model predicts temperature by optimally scaling the contributions of a CO2 model, and a sunspot model, 
+to minimize temperature prediction error.  As the model can't predict volcanos and minor climate oscillations the temperature will fluctuate around the prediction.
 ![Plot](./TempPrediction.png)
 
 ## The CO2 Model
