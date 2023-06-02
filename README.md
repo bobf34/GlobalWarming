@@ -2,10 +2,10 @@
 Two simple, but surprisingly accurate models for predicting global temperatures.  Volcanic activity and climate oscillations will cause the actual temperature to fluctuate around the prediction.
 <br><br>
 The first model is a hybrid model predicting global temperatures using using sunspots and CO2 concentrations.
-![Plot](./TempPrediction.png)
+![Plot](./images//TempPrediction.png)
 
 The second model predicts global temperatures from solar magnetic fields. 
-![Plot](./SolarMagneticPrediction.png)
+![Plot](./images/SolarMagneticPrediction.png)
 
 ### Brief Model Description
 [Brief Sunspot/CO2 Model Description](hybridmodel.md)
