@@ -482,8 +482,8 @@ else:  #use unaveraged global temperature
 
 # Get very strong ENSO (El Niño) events to add to plot
 enso = ENSO(yearOffset=1/24)
-df_markv = enso.getEvents(2.0)
-df_markv = df_tempMA.merge(df_markv,on='Year')
+df_enso_events = enso.getEvents(2.0)
+df_enso_events = df_tempMA.merge(df_enso_events,on='Year')
 
 # modify the offset of the sunspot data to make it easier to work with
 x_ss = df_ss.Sunspots.values
@@ -613,7 +613,7 @@ elif bestCO2comp == 0:
     ax_temp.plot(df_model_comb.Year,df_model_comb.Temperature,'b',label='Sunspot Model Only Prediction'+errStr)
 else:
     ax_temp.plot(df_model_comb.Year,df_model_comb.Temperature,'b',label='Sunspot + CO2 Model Prediction'+errStr)
-ax_temp.plot(df_markv.Year,df_markv.Temperature,'ko',markersize=7,label='ENSO Index>2.0')
+ax_temp.plot(df_enso_events.Year,df_enso_events.Temperature,'ko',markersize=7,label='ENSO Index>2.0')
 ax_temp.grid()
 ax_temp.legend()
 plt.show()
