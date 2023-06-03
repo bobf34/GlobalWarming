@@ -14,7 +14,7 @@ The second model predicts global temperatures from solar magnetic fields.
 [Full Sunspot/CO2 Model Description and Validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
 
 ### To Run
-Download the four python program files.
+Download the python program files.
 <br>
 Run __tempPredict.py__  for the sunspot/CO2 model
 <br>
