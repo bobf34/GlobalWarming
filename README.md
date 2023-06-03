@@ -7,11 +7,8 @@ The first model is a hybrid model predicting global temperatures using using sun
 The second model predicts global temperatures from solar magnetic fields. 
 ![Plot](./images/SolarMagneticPrediction.png)
 
-### Brief Model Description
+### Model Description
 [Brief Sunspot/CO2 Model Description](hybridmodel.md)
-
-### Detailed Model Description and Validation
-[Full Sunspot/CO2 Model Description and Validation (pdf)](https://localartist.org/media/CutlerModelDescription.pdf)
 
 ### To Run
 Download the python program files.
