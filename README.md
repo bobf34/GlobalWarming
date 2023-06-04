@@ -12,7 +12,11 @@ The second model predicts global temperatures from solar magnetic fields.
 
 ### To Run
 Download the python program files.
+
+Setup the environment:
 <br>
+pip install -r requirements.txt
+
 Run __tempPredict.py__  for the sunspot/CO2 model
 <br>
 Run __tempPredictSolarMagnetic.py__ for the Solar Magnetic Field model
