@@ -30,7 +30,8 @@ def getTempSunspotData(useLocal = True, plotData=False, temp_filename = 'globalT
         url = 'https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/land_ocean/all/12/1850-2023.csv'
         logging.debug('Gathering Temperature data from '+url+' ...')
         df_temp=pd.read_csv(url, encoding="ISO-8859-1",header=4)
-        df_temp.rename(columns={"Value": "Temperature"},inplace=True)
+        pdb.set_trace()
+        df_temp.rename(columns={"Anomaly": "Temperature"},inplace=True)
         #convert to decimal year e.e. 185001, 185002 to 1850.042, 1850.125
         x = np.modf(df_temp.Year/100)
         df_temp.Year = x[1] + (x[0]*100-1)/12+1/24
