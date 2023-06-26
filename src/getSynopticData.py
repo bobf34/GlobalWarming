@@ -74,7 +74,7 @@ def getSynopticData(useLocal = True, start=1642,end=2258, filename = 'synoptic.c
     else:
        df = None
        for r in range(start,end+1):
-           print(r)
+           print('Fetching Synoptic:',r,' Progress: {:.1f}%'.format((r-start)/(end-start)*100))
            if df is None:
               df = getCycle(r)
            else:
