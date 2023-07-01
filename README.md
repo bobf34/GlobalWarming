@@ -1,11 +1,8 @@
 # Global Warming
-Two simple, but surprisingly accurate models for predicting global temperatures.  Volcanic activity and climate oscillations will cause the actual temperature to fluctuate around the prediction.
+A simple, but surprisingly accurate model for predicting global temperatures.  Volcanic activity and climate oscillations will cause the actual temperature to fluctuate around the prediction.
 <br><br>
-The first model is a hybrid model predicting global temperatures using using sunspots and CO2 concentrations.
+The model is a hybrid model predicting global temperatures using using sunspots and CO2 concentrations.
 ![Plot](./images//TempPrediction.png)
-
-The second model predicts global temperatures from solar magnetic fields. 
-![Plot](./images/SolarMagneticPrediction.png)
 
 ### Model Description
 [Brief Sunspot/CO2 Model Description](hybridmodel.md)
@@ -18,9 +15,6 @@ Setup the environment:
 pip install -r requirements.txt
 
 Run __tempPredict.py__  for the sunspot/CO2 model
-<br>
-Run __tempPredictSolarMagnetic.py__ for the Solar Magnetic Field model
-
 
 ### Changing the Sunspot/CO2 model
 There are several different preconfigured models in a comment block.  Copy the desired model *parms* dictionary and replace (or place below) the parms dictionary located just below the comment block.  You can also create your own model by adjusting the parameters of an existing model.
