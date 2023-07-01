@@ -34,7 +34,7 @@ __WARNING:__ Your results may change, or may not match results shown here as the
 ### Misc
 When __getTempSunspotData.py__ is run as a stand-alone program it will plot temperature and sunspot data.
 <br><br>
-When __getSynopticData.py__ is run as a stand-alone program it will plot a synoptic chart, butterfly diagram, and magnetic field data.
+When __getSynopticData.py__ is run as a stand-alone program it will plot a synoptic chart, butterfly diagram, and magnetic field data.  This program is not used by the model.
 
 ### Data Credits
 Sunspot Data: WDC-SILSO, [Royal Observatory of Belgium, Brussels](https://www.sidc.be/silso/datafiles)
