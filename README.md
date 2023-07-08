@@ -3,6 +3,8 @@ A simple, but surprisingly accurate model for predicting global temperatures.  V
 <br><br>
 The model is a hybrid model predicting global temperatures using using sunspots and CO2 concentrations.
 ![Plot](./images//TempPrediction.png)
+![Plot](./images//with_El_Niño_Events.png)
+
 
 ### Model Description
 [Brief Sunspot/CO2 Model Description](hybridmodel.md)
