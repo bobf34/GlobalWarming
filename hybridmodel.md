@@ -8,7 +8,7 @@ The CO2 model is a simple 3rd-order polynomial that closely approximates the log
 lacking in features, the model only predicts the overall upward trend. Long periods of cooling are not predicted.  This plot shows the 
 temperature prediction using only the CO2 model.
 
-![Plot](./images/TempPredictionCO2only.png)
+![Plot](./images/tempPredictionCO2only.png)
 
 ## The Sunspot Model
 Sunspots don't significantly affect earth's climate. They are a proxy for solar activity.  When the sun is more active, there are more sunspots.
