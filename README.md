@@ -7,7 +7,7 @@ Note: Sunspot data accuracy prior to 1800 limits prediction accuracy prior to 19
 <br>
 <br>
 ![Plot](./images//TempPrediction.png)
-![Plot](./images//with_El_Niño_Events.png)
+![Plot](./images//with_volcano_Events.png)
 
 
 ### Model Description
