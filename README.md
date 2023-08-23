@@ -31,7 +31,7 @@ Set variable *showSpectrums* to True for plots of the temperature and sunspot sp
 ### Required Datasets
 The first time you run the program it will automatically download the required datasets.
 
-__WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.
+__WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.jjj
 
 ### Misc
 When __getTempSunspotData.py__ is run as a stand-alone program it will plot temperature and sunspot data.
@@ -40,8 +40,9 @@ When __getSynopticData.py__ is run as a stand-alone program it will plot a synop
 
 ### Data Credits
 Sunspot Data: WDC-SILSO, [Royal Observatory of Belgium, Brussels](https://www.sidc.be/silso/datafiles)
-<br>
-Global Temperature Anomaly Data: [NOAA]( https://www.ncei.noaa.gov/access/monitoring/global-temperature-anomalies/anomalies)
+<br> 
+Global Temperature Anomaly Data HadCRUT5: [Met Office](https://www.metoffice.gov.uk/hadobs/hadcrut5)<br>
+Global Temperature Anomaly Data NOAA: [NOAA]( https://www.ncei.noaa.gov/access/monitoring/global-temperature-anomalies/anomalies)
 <br>
 Wilcox Solar Observatory Synoptic Charts and Data [WSO](http://wso.stanford.edu/synopticl.html)
 <br>
