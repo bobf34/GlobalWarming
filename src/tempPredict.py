@@ -18,7 +18,11 @@ f11parms3 = {'fc':.0933,'bw':.061,'g':1.3}   #compromise
 #fc = center frequency, g controls amount of suppression. Suppression increases with G, max = 1
 f42parms1 = {'fc':[0.024169921875],'g':[0.69]}
 
-firstValidYear = 1895 # Ignore the data before 1895 when fitting and computing error, 
+tempDataSource = 'HC5'
+
+firstDispYear = 1880
+lastDispYear = 2030
+firstValidYear = 1900 # Ignore the data before 1895 when fitting and computing error, 
                       # The earliest global temperature and/or sunspot data may be not be that accurate.
 splitYear = 1997      # New satellites with better temperature sensors started launchng in 1998 (NOAA-15) which might
                       # explain the sudden change in the variance of the error.  On the error plot, the RMS error
@@ -53,76 +57,62 @@ About the model types
 
    NOTE:  The RMS errors shown below may not match your results as the sunspot and global temperature datasets are modified and updated
 
-#CO2 only model. 
-#RMS error: 0.0924   CO2 comp: 1.121
-parms = {'modelName':'1: CO2 Only Model','fname':'', 'modType':'NONE',
+#>>>>> CO2 only model. 
+parms = {'modelName':'CO2 Only Model','fname':'CO2_only.csv', 'modType':'NONE',
          'rectW':99, 'rectW2':11.1, 'MA':3, 'M42':True, 
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':0, 'co2comp':-1}  
 
-#BASIC MODEL 99-year moving average predicts 13 years into future. 
-#RMS error: 0.0984
-parms = {'modelName':'2: Basic: 99-Year Moving Average Model', 'fname':'',
+#>>>>> Core 99-Year Moving Average Model
+parms = {'modelName':'Core 99-Year Moving Average Model', 'fname':'Core_99.csv',
          'modType':'RECT','rectW':99, 'rectW2':11.1, 'MA':3, 'M42':False, 
          'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':13.5, 'co2comp':0}  
 
-#Improved Model 2, adds 11-year moving average predicts 9.5 years into future. 
-#RMS error: 0.0761
-parms = {'modelName':'3a: Model 99-11','fname':'',
+#>>>>> Core 99-year plus 11-year Moving averages
+parms = {'modelName':'Model 99-11','fname':'99_11.csv',
          'modType':'RECT2','rectW':99, 'rectW2':11, 'MA':3, 'M42':False, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':9.5, 'co2comp':0}  
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':9.0, 'co2comp':0}  
 
-#Same as 3a except slightly shorter rectW and rectW2, predicts 10.5 years into future.  Allows more 11-year energy in prediction. 
-#RMS error: 0.0767
-parms = {'modelName':'3b Model 98-9','fname':'',
-         'modType':'RECT2','rectW':98, 'rectW2':10, 'MA':3, 'M42':False, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10.5, 'co2comp':0}  
 
-# Improved Model 3a:  Best for future prediction Adds compensation for 42. 
-#RMS error: 0.0651
-parms = {'modelName':'4a: : Best Model for Future Prediction without CO2','fname':'bestFuturePredict.csv',
+#>>>>> Core 99-year plus 11-year Moving averages plus 42-yeer compensation
+parms = {'modelName':'99-11-42','fname':'99_11_42.csv',
          'modType':'RECT2','rectW':98, 'rectW2':10, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10.5, 'co2comp':0}  
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':9.9, 'co2comp':0}  
 
-#>>>>>>>>>  Model 4 with CO2:  <<<<<<<<<<<<<. 
-#RMS error: 0.0621
-parms = {'modelName':'4b: Winner: Best Model for Future Prediction with CO2','fname':'bestFuturePredict.csv',
+#>>>>> 99-11-42 with CO2:  <<<<<<<<<<<<<. 
+parms = {'modelName':'99-11-42 CO2','fname':'99_11_42_C.csv',
          'modType':'RECT2','rectW':98, 'rectW2':10, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10.5, 'co2comp':-1}  
+         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':10.0, 'co2comp':-1}  
 
-#Improved Model 3, replaces short moving average with notch filter, no 42-year comp. 
-#RMS error: 0.0797
-parms = {'modelName':'5: Improved Model 3: 98-N','fname':'',
+#>>>>> 98-Notch
+parms = {'modelName':'98-Notch','fname':'98_N.csv',
          'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':False, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.5, 'co2comp':0.0}  
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1, 'co2comp':0.0}  
 
-#>>>>>>>>>>>  Model with best post balanced splitYear RMS error No CO2 compensation <<<<<<<<<<<<<<<<<. 
-#RMS error: 0.0694
-parms = {'modelName':'6: Best Sunspot-Only Lower error after '+str(splitYear),'fname':'bestSunspotOnly.csv',
-         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.3, 'weightedFit':True, 'extraWeight':3, 'co2comp':0.0}  
+#>>>>> 98-Notch-42 
+parms = {'modelName':'98-Notch-42','fname':'98_N_42.csv',
+        'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True,'tempDataSource':'HC5',
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0.0, 'weightedFit':False, 'extraWeight':4, 'co2comp':0}  
 
-#>>>>>>>>>>>>  Model with lowest overall RMS error, less accruate post splitYear  <<<<<<<<<<<<<<<<<<<. 
-#RMS error: 0.0638  CO2 comp: 0.162
-parms = {'modelName':'7: Winner -- Model with Lowest RMS error','fname':'LowestRmsModel.csv',
-         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms1, 'advance':1.2, 'co2comp':-1}  
-
-#  Search demo uses f11parms3 compromise notch filter settings. 
-#RMS error: 0.0644  CO2 comp:0.24
-parms = {'modelName':'8: Search for CO2','fname':'co2Search.csv',
+#>>>>> 98-Notch-42 Search for CO2
+parms = {'modelName':'98-Notch-42 search CO2','fname':'98_N_42_CS.csv','tempDataSource':'HC5',
          'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 'optimalCO2': False,
-         'f42parms':f42parms1, 'f11parms':f11parms3, 'advance':1.4, 'co2comp':-1}  
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'co2comp':-1}  
 
-#>>>>>>>>>>> Best Overall Model. Balances overall RMS error with post splitYear accuracy <<<<<<<<<<<<<<<<<. 
-#RMS error: 0.0663 CO2 comp:0.213
-parms = {'modelName':'9: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
-         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
+#>>>>> 98-Notch-42 CO2 using NOAA temperature data
+parms = {'modelName':'98-Notch-42 NOAA','fname':'98_N_42_C_NOAA.csv',
+         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True,'tempDataSource':'NOAA',
          'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.4, 'weightedFit':True, 'extraWeight':4, 'co2comp':-1}  
+
+#>>>>> 98-Notch-42 CO2 using HadCRUT5 temperature data
+parms = {'modelName':'98-Notch-42 CO2 HadCRUT5','fname':'98_N_42_C_HC5.csv',
+        'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True,'tempDataSource':'HC5',
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0.4, 'weightedFit':False, 'extraWeight':4, 'co2comp':-1}  
 '''
 #Active Model Copy from comment lock above and place below
-parms = {'modelName':'9: Winner -- Overall Best Model','fname':'bestOverallModel.csv',
-         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':1.4, 'weightedFit':True, 'extraWeight':4, 'co2comp':-1}  
+parms = {'modelName':'98-Notch-42 CO2 HadCRUT5','fname':'98_N_42_C_HC5.csv',
+        'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True,'tempDataSource':'HC5',
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0.4, 'weightedFit':False, 'extraWeight':4, 'co2comp':-1}  
+
 
 # NOTE:  firstValidYear and splitYear are defined before the models
 saveResults = False  #If true and fname is defined in parms, the output results are saved into a CSV file
@@ -131,6 +121,13 @@ showSpectrums = False  #Create a separate plot window showing temperature and su
 showExtra='error'  # 'model' plots the model over the sunspot data used for the first prediction in 1880
                    # 'error' plots the error over the prediction
                    #  Use empty string '' for no extra plot
+
+showVolcanos = False
+volcanos = [1963+2/12, 1982+4/12, 1991+6/12]
+volcanoTxt = 'Agung, El Chichón, and Pinatubo volcanic eruptions'
+
+showEnsoEvents = False
+ensoThresh = 2.0
 
 showModelName = True  # Displays the model name in the plots. Default True
 showParms = False     # Ddisplays the parms variable. Default False
@@ -149,6 +146,10 @@ if 'weightedFit' in parms:
    weightedFit = parms['weightedFit']
 if 'extraWeight' in parms:
    extraWeight = parms['extraWeight']
+if 'tempDataSource' in parms:
+    tempDataSource = parms['tempDataSource']
+if 'firstValidYear' in parms:
+    firstValidYear = parms['firstValidYear']
 
 
 ###################################################################################################
@@ -253,15 +254,23 @@ def getDataInFitRegion(df_temp,df_tempMA,df_model,firstValidYear,co2comp=1):
     if firstValidYear > df_tempMA.Year[0]:
        fitStartYear = firstValidYear
     else:
-       firstFitYear = df_tempMA.Year[0]
+       firstValidYear = df_tempMA.Year[0]
     lastFitYear = df_tempMA.Year.iloc[-1]
 
     idxMA =np.where((df_tempMA.Year>=fitStartYear)&(df_tempMA.Year <=lastFitYear))[0]
+    dft = df_tempMA.iloc[idxMA]
     idxModel =np.where((df_model.Year>=fitStartYear)&(df_model.Year <=lastFitYear))[0]
+    dfm = df_model.iloc[idxModel]
+    idx = np.where(np.abs(np.subtract.outer(dft.Year.values,dfm.Year.values))<=1/12)
 
-    tma = df_tempMA.Temperature[idxMA].values
-    model = df_model.Temperature[idxModel].values
+
+    #tma = df_tempMA.Temperature[idxMA].values
+    tma = df_tempMA.iloc[idxMA].Temperature.values
+    tma = dft.iloc[idx[0]].Temperature.values
+    model = df_model.iloc[idxModel].Temperature.values
+    model = dfm.iloc[idx[1]].Temperature.values
     year = df_tempMA.Year[idxMA]
+    year = dft.iloc[idx[0]].Year
 
     co2 = co2Model(co2comp,year)
     return [tma,model,co2,year]
@@ -366,19 +375,32 @@ def computeCombinedModelOutput(fitParms, dftemp,df_model):
     model = fitParms['gainSS']*df_model.Temperature+fitParms['offset']
     temp = model+co2
     df_model_comb = pd.DataFrame({'Year':df_model.Year,
-                                'Temperature':temp,
-                                'modelPredict':model,
-                                'co2predict':co2})
+                                   'Temperature':temp,
+                                   'modelPredict':model,
+                                   'co2predict':co2}).reset_index(drop=True)
 
-    idx =np.where((df_model_comb.Year>=dftemp.Year[0])&(df_model_comb.Year <=dftemp.Year.iloc[-1]))[0]
-    error = dftemp.Temperature.values - df_model_comb.Temperature[idx].values
-    df_err = pd.DataFrame( {'Year': dftemp.Year, 'error': error })
+    #startidx =np.where(df_model_comb.Year>=dftemp.Year[0])[0][0]
+    #error = dftemp.Temperature.values - df_model_comb.iloc[startidx:startidx+len(dftemp)].Temperature.values
+    #idx =np.where((df_model_comb.Year>=dftemp.Year[0])&(df_model_comb.Year <=dftemp.Year.iloc[-1]))[0]
+    idx = np.where(np.abs(np.subtract.outer(dftemp.Year.values,df_model_comb.Year.values))<=1/24)
+    error = dftemp.Temperature.loc[idx[0]].values - df_model_comb.Temperature.loc[idx[1]].values
+
+    df_err = pd.DataFrame( {'Year': dftemp.Year.loc[idx[0]], 'error': error }).reset_index(drop=True)
     if False: #for debug use
         df_model_comb.plot(x='Year')
         df_err.plot(x='Year')
         plt.show()
-    
+
     return [df_model_comb,df_err]
+
+def getClosestIdx(years1,years2,dx=1/12):
+     idx = np.where(np.abs(np.subtract.outer(years1,years2))<=dx)[0]
+     locs = idx[np.where(np.diff(np.append([-10000],idx))>1)[0]]
+     return locs
+
+def  getMarkers (df,column,years):
+     yearIdx = getClosestIdx(df.Year.values,years)
+     return pd.DataFrame({'Year':years, 'Values': df[column].loc[yearIdx]})
 
 
 def decYearToYrMo(decYr):
@@ -466,7 +488,8 @@ def plotSpectrums(x_ss, df_temp,df_model_comb,bw=0.15,window='boxcar'):
 ############  BEGIN MAIN PROGRAM ####################
 
 # Get the temperature and sunspot datasets
-[df_temp,df_ss] = getTempSunspotData(useLocal = True, plotData=False)
+
+[df_temp,df_ss] = getTempSunspotData(useLocal = True, tempSrc = tempDataSource, plotData=False)
 
 #safety check
 if firstValidYear < df_temp.Year[0]:
@@ -482,7 +505,7 @@ else:  #use unaveraged global temperature
 
 # Get very strong ENSO (El Niño) events to add to plot
 enso = ENSO(yearOffset=1/24)
-df_enso_events = enso.getEvents(2.0)
+df_enso_events = enso.getEvents(ensoThresh)
 df_enso_events = df_tempMA.merge(df_enso_events,on='Year')
 
 # modify the offset of the sunspot data to make it easier to work with
@@ -497,12 +520,7 @@ model = getModel(parms)
 
 # Use the model to predict the temperature.  Convolve the model with the sunspot data
 model_predict = np.convolve(x_ss,model,mode='valid')
-
-#truncate the data prior to the first year in df_temp
-model_predict = model_predict[-(len(df_temp)+int(12*parms['advance'])):]
-
-#create a time index
-t_model = np.arange(len(model_predict))/12+df_temp.Year[0]
+t_model = df_ss.Year.iloc[-len(model_predict):]+parms['advance']
 
 # combine the time index with the uncompensated prediction
 df_model = pd.DataFrame( {'Year':t_model,'Temperature':model_predict})
@@ -589,6 +607,7 @@ elif showExtra == 'error': # plot prediction error
    ax_extra.plot(df_err.Year.values[idx1],rms1*np.ones(len(idx1[0])),'r',dashes=[1,1],label='RMS:'+'{:.5f}'.format(rms1))
    ax_extra.plot(df_err.Year.values[idx2],rms2*np.ones(len(idx2[0])),'r',dashes=[4,1],label='RMS:'+'{:.5f}'.format(rms2))
    ax_extra.legend()
+   ax_extra.set_xlim(firstDispYear, lastDispYear)
 
 
 if showCO2search:  #plot the co2 optimization
@@ -600,12 +619,19 @@ if showCO2search:  #plot the co2 optimization
 
 #plot the temperatures
 ax_temp.set_title('Temperature Anomalies ')
-ax_temp.plot(df_temp.Year,df_temp.Temperature,'.8',label='NOAA Global Temp Anomaly')
+if tempDataSource == 'NOAA':
+    ax_temp.plot(df_temp.Year,df_temp.Temperature,'.8',label='NOAA Global Temp Anomaly')
+elif tempDataSource == 'HC5':
+    ax_temp.plot(df_temp.Year,df_temp.Temperature,'.8',label='HadCRUT5 Global Temp Anomaly')
+else:
+    ax_temp.plot(df_temp.Year,df_temp.Temperature,'.8',label='??? Global Temp Anomaly')
+
 ax_temp.plot(df_tempMA.Year,df_tempMA.Temperature,'r',label='Temp '+str(parms['MA'])+' Yr Moving Average')
 #ax_temp.plot(t_model,co2Model(bestCO2comp,t_model),'.1',dashes=[4,4],label='CO2 Compensation: '+str(bestCO2comp)+'°C')
 ax_temp.plot(df_model_comb.Year,df_model_comb.co2predict,'.1',dashes=[4,4],label='CO2 Compensation: '+'{:1.3f}'.format(bestCO2comp)+'°C')
 ax_temp.set_ylabel('°C')
 ax_temp.set_xlabel('Year')
+ax_temp.set_xlim(firstDispYear, lastDispYear)
 errStr = ': RMS Error:'+'{:.4f}'.format(fitParms['rmserr'])+'°C'
 if parms['modType'] == 'NONE':
     ax_temp.plot(df_model_comb.Year,df_model_comb.Temperature,'b',label='CO2 Model Only Prediction'+errStr)
@@ -613,7 +639,19 @@ elif bestCO2comp == 0:
     ax_temp.plot(df_model_comb.Year,df_model_comb.Temperature,'b',label='Sunspot Model Only Prediction'+errStr)
 else:
     ax_temp.plot(df_model_comb.Year,df_model_comb.Temperature,'b',label='Sunspot + CO2 Model Prediction'+errStr)
-ax_temp.plot(df_enso_events.Year,df_enso_events.Temperature,'ko',markersize=7,label='ENSO Index>2.0')
+
+if showVolcanos:
+    df_volcanos = getMarkers(df_tempMA,'Temperature',volcanos)
+    ax_temp.plot(df_volcanos.Year,df_volcanos.Values,'kD',label = volcanoTxt)
+
+if showEnsoEvents:
+    if ensoThresh < 0:
+        lbltxt = 'ENSO Index<{:1.1f}'.format(ensoThresh)
+    else:
+        lbltxt = 'ENSO Index>{:1.1f}'.format(ensoThresh)
+
+    ax_temp.plot(df_enso_events.Year,df_enso_events.Temperature,'ko',markersize=7,label=lbltxt)
+
 ax_temp.grid()
 ax_temp.legend()
 plt.show()
