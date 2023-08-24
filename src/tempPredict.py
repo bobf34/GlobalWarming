@@ -91,12 +91,12 @@ parms = {'modelName':'98-Notch','fname':'98_N.csv',
 #>>>>> 98-Notch-42 
 parms = {'modelName':'98-Notch-42','fname':'98_N_42.csv',
         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True,'tempDataSource':'HC5',
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0.0, 'weightedFit':False, 'extraWeight':4, 'co2comp':0}  
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0.4, 'weightedFit':False, 'extraWeight':4, 'co2comp':0}  
 
 #>>>>> 98-Notch-42 Search for CO2
 parms = {'modelName':'98-Notch-42 search CO2','fname':'98_N_42_CS.csv','tempDataSource':'HC5',
          'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True, 'optimalCO2': False,
-         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0, 'co2comp':-1}  
+         'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0.4, 'co2comp':-1}  
 
 #>>>>> 98-Notch-42 CO2 using NOAA temperature data
 parms = {'modelName':'98-Notch-42 NOAA','fname':'98_N_42_C_NOAA.csv',
@@ -112,7 +112,6 @@ parms = {'modelName':'98-Notch-42 CO2 HadCRUT5','fname':'98_N_42_C_HC5.csv',
 parms = {'modelName':'98-Notch-42 CO2 HadCRUT5','fname':'98_N_42_C_HC5.csv',
         'modType':'NOTCH','rectW':98, 'rectW2':11, 'MA':3, 'M42':True,'tempDataSource':'HC5',
          'f42parms':f42parms1, 'f11parms':f11parms2, 'advance':0.4, 'weightedFit':False, 'extraWeight':4, 'co2comp':-1}  
-
 
 # NOTE:  firstValidYear and splitYear are defined before the models
 saveResults = False  #If true and fname is defined in parms, the output results are saved into a CSV file
