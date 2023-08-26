@@ -6,7 +6,9 @@ The model is a hybrid model predicting global temperatures using using sunspots 
 Note: Sunspot data accuracy prior to 1800 limits prediction accuracy prior to 1900. See [Muñoz-Jaramillo, A.; Vaquero, J.M., 2019](https://arxiv.org/pdf/2203.11919)
 <br>
 <br>
+__Sunspots + CO2 model:__
 ![Plot](./images//TempPrediction.png)
+__Sunspot-only model:__
 ![Plot](./images//with_volcano_Events.png)
 
 
@@ -35,7 +37,7 @@ Set variable *showSpectrums* to True for plots of the temperature and sunspot sp
 ### Required Datasets
 The first time you run the program it will automatically download the required datasets.
 
-__WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.jjj
+__WARNING:__ Your results may change, or may not match results shown here as the data sets are constantly being updated and revised.
 
 ### Misc
 When __getTempSunspotData.py__ is run as a stand-alone program it will plot temperature and sunspot data.
