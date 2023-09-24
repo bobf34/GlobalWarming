@@ -15,7 +15,7 @@ temperature prediction using only the CO2 model.
 Sunspots don't significantly affect earth's climate. They are a proxy for solar activity.  When the sun is more active, there are more sunspots.
 
 The sunspot model contains three components:
-*  A 99-Year Moving Average
+*  A 98 or 99-Year Moving Average
 *  A filter for attenuating the 11-year sunspot cycle energy (either a notch filter, or a short moving average)
 *  A method for attenuating energy in the 42-year sunspot cycle.
 
