@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import signal
+from scipy import stats
 import matplotlib.pyplot as plt
 import pdb
 from scipy.fft import fft,ifft,fftshift
@@ -329,7 +330,8 @@ def fitSunspotModelToTemp(df_temp,df_tempMA,df_model,co2comp,firstValidYear,spli
             print("Warning: sklearn not installed")
 
     rmserr = rms(err)   #rms err is computed over the fit interval
-    fitParms = {'gainSS':gm, 'gainCO2':co2comp,'offset':c,'rmserr':rmserr}
+    R= stats.pearsonr(tma_comp,np.dot(X,[gm,c])).statistic
+    fitParms = {'gainSS':gm, 'gainCO2':co2comp,'offset':c,'rmserr':rmserr,'R':R}
     return fitParms 
     
 def fitBothModelsToTemp(df_temp,df_tempMA,df_model,firstValidYear,splitYear):
@@ -365,7 +367,8 @@ def fitBothModelsToTemp(df_temp,df_tempMA,df_model,firstValidYear,splitYear):
             print("Warning: sklearn not installed")
 
     rmserr = rms(err)
-    fitParms = {'gainSS':gm, 'gainCO2':gc,'offset':c,'rmserr':rmserr}
+    R= stats.pearsonr(tma,np.dot(X,[gm,gc,c])).statistic
+    fitParms = {'gainSS':gm, 'gainCO2':gc,'offset':c,'rmserr':rmserr,'R':R}
     return fitParms 
 
 def computeCombinedModelOutput(fitParms, dftemp,df_model):
@@ -631,7 +634,8 @@ ax_temp.plot(df_model_comb.Year,df_model_comb.co2predict,'.1',dashes=[4,4],label
 ax_temp.set_ylabel('°C')
 ax_temp.set_xlabel('Year')
 ax_temp.set_xlim(firstDispYear, lastDispYear)
-errStr = ': RMS Error:'+'{:.4f}'.format(fitParms['rmserr'])+'°C'
+#errStr = ': RMS Error: {:.4f}°C R: {:.3f}'.format(fitParms['rmserr'],fitParms['R'])
+errStr = ': RMS Error: %.4f°C  R: %.4f'%(fitParms['rmserr'],fitParms['R'])
 if parms['modType'] == 'NONE':
     ax_temp.plot(df_model_comb.Year,df_model_comb.Temperature,'b',label='CO2 Model Only Prediction'+errStr)
 elif bestCO2comp == 0:
