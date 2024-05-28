@@ -12,7 +12,7 @@ temperature prediction using only the CO2 model.
 ![Plot](./images/TempPredictionCO2only.png)
 
 ## The Sunspot Model
-Sunspots don't significantly affect earth's climate. They are a proxy for solar activity.  When the sun is more active, there are more sunspots.
+Sunspots don't significantly affect earth's climate. They are a proxy for solar activity. Sunspot characteristics, such as the number of sunspots, and the frequency of the 11-year cycle, change with solar activity.
 
 The sunspot model contains three components:
 *  A 98 or 99-Year Moving Average
