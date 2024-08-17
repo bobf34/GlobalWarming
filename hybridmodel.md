@@ -23,6 +23,10 @@ This plot shows the temperature prediction using only the sunspot model (with th
 
 ![Plot](./images/TempPredictionSSOnly.png)
 
+This plot shows the same model compared to NOAA's sea surface temperature dataset.
+
+![Plot](./images//SSTTempPrediction.png)
+
 The 99-Year Moving average supplies most of the information in the prediction. The moving average model is shown positioned over the sunspot
 data averaged to produce the first 1880 temperature prediction.  The model is slid to the right to produce the remainder of the predictions  The earliest predictions use sunspot data from the late 1700's to predict the earliest global temperatures, which may explain the less accurate results prior to 1900.
 
