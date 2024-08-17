@@ -3,13 +3,15 @@ A simple, but surprisingly accurate model for predicting global temperatures.  V
 <br><br>
 The model is a hybrid model predicting global temperatures using using sunspots and CO2 concentrations.  
 <br>
-Note: Sunspot data accuracy prior to 1800 limits prediction accuracy prior to 1900. See [Muñoz-Jaramillo, A.; Vaquero, J.M., 2019](https://arxiv.org/pdf/2203.11919)
+Note: Sunspot data accuracy prior to 1800 limits prediction accuracy prior to 1900. See [Muñoz-Jaramillo, A.; Vaquero, J.M., 2019](https://arxiv.org/pdf/2203.11919). However, when comparing the prediction to sea surface temperatures, it's reasonable to question the accuracy of the global temperature data prior to 1900.
 <br>
 <br>
 __Sunspots + CO2 model:__
 ![Plot](./images//TempPrediction.png)
 __Sunspot-only model:__
 ![Plot](./images//with_volcano_Events.png)
+__Sunspot-only model compared to SST:__
+![Plot](./images//SSTTempPrediction.png)
 
 
 ### Model Description
