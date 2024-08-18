@@ -53,7 +53,7 @@ def convertSSTNetCDF(filename = 'sst.mnmean.nc',movingAverageMonths=0):
       global_average= np.nanmean(sst_variable[:,:,:],axis=(1,2))
       year = pd.DatetimeIndex(times).year + pd.DatetimeIndex(times).month/12-1/24
 
-   # Create DataFrame with time, latitude, longitude, expver, t2m, and tp values
+   # Create DataFrame 
    df = pd.DataFrame({'Year':year,'Temperature':global_average})
    if movingAverageMonths > 0:
       df['MovingAverage']=df.Temperature.rolling(movingAverageMonths).mean()
