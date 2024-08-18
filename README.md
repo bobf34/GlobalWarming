@@ -56,5 +56,5 @@ Wilcox Solar Observatory Synoptic Charts and Data [WSO](http://wso.stanford.edu/
 <br>
 El Niño Southern Oscillation (ENSO) data: [NOAA](https://psl.noaa.gov/enso/)
 <br>
-NOAA Extended Reconstructed Sea Surface Temperature (SST) V4 data provided by the NOAA PSL, [website](https://psl.noaa.gov)
+NOAA Extended Reconstructed Sea Surface Temperature (SST) V5 data provided by the NOAA PSL, [website](https://psl.noaa.gov)
 
