@@ -21,6 +21,7 @@ def getHC5TempData(useLocal = False, plotData=False,temp_filename = 'hc5TempAnom
         df_temp = pd.read_csv(temp_filename)
     else:
         url = 'https://www.metoffice.gov.uk/hadobs/hadcrut5/data/current/analysis/diagnostics/HadCRUT.5.0.1.0.analysis.summary_series.global.monthly.csv'
+        url = 'https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.0.2.0/analysis/diagnostics/HadCRUT.5.0.2.0.analysis.summary_series.global.monthly.csv'
         logging.debug('Gathering Temperature data from '+url+' ...')
         df_temp=pd.read_csv(url)
         df_temp.rename(columns={"Anomaly (deg C)": "Temperature","Time":"Year"},inplace=True)
@@ -46,10 +47,10 @@ def getNOAATempData(useLocal = False, temp_filename = 'globalTempAnomalies.csv')
     if useLocal and os.path.isfile(temp_filename):
         df_temp = pd.read_csv(temp_filename)
     else:
-        url = 'https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/land_ocean/all/12/1850-2023.csv'
+        url = 'https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/land_ocean/all/12/1850-2024.csv'
         logging.debug('Gathering Temperature data from '+url+' ...')
         df_temp=pd.read_csv(url, encoding="ISO-8859-1",header=4)
-        df_temp.rename(columns={"Anomaly": "Temperature"},inplace=True)
+        df_temp.rename(columns={"Anomaly": "Temperature","Date":"Year"},inplace=True)
         #convert to decimal year e.e. 185001, 185002 to 1850.042, 1850.125
         x = np.modf(df_temp.Year/100)
         df_temp.Year = x[1] + (x[0]*100-1)/12+1/24
